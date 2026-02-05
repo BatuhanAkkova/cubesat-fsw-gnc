@@ -12,6 +12,7 @@ constexpr double RAD2DEG = 180.0 / PI;
 
 // Vector types
 using Vector3 = Eigen::Vector3d;
+using Vector4 = Eigen::Vector4d;
 using VectorX = Eigen::VectorXd;
 using Matrix3 = Eigen::Matrix3d;
 using MatrixX = Eigen::MatrixXd;

@@ -38,6 +38,43 @@ target_sources(common INTERFACE
 )
 target_link_libraries(common INTERFACE core_lib)
 
+# --- HAL Interfaces ---
+add_library(hal_interfaces INTERFACE)
+target_sources(hal_interfaces INTERFACE
+    src/hal/interfaces/IGyro.hpp
+    src/hal/interfaces/IMagnetometer.hpp
+    src/hal/interfaces/ITorquer.hpp
+    src/hal/interfaces/IRW.hpp
+)
+target_link_libraries(hal_interfaces INTERFACE common)
+
+# --- Sim Engine ---
+add_library(sim_engine STATIC
+    src/sim/dynamics/RigidBody.cpp
+    src/sim/dynamics/Orbit.cpp
+)
+# Integrator.hpp is a template header, so it doesn't need to be compiled, 
+# but we can list it for IDEs.
+target_sources(sim_engine PUBLIC
+    src/sim/engine/Integrator.hpp
+    src/sim/dynamics/RigidBody.hpp
+    src/sim/dynamics/Orbit.hpp
+)
+target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(sim_engine PUBLIC common)
+
+# --- Sim Models ---
+add_library(sim_models STATIC
+    src/sim/models/SimGyro.cpp
+    src/sim/models/SimMagnetometer.cpp
+)
+target_sources(sim_models PUBLIC
+    src/sim/models/SimGyro.hpp
+    src/sim/models/SimMagnetometer.hpp
+)
+target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
+
 # --- FSW Core ---
 add_library(fsw_core INTERFACE)
 target_sources(fsw_core INTERFACE
