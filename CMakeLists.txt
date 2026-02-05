@@ -67,10 +67,12 @@ target_link_libraries(sim_engine PUBLIC common)
 add_library(sim_models STATIC
     src/sim/models/SimGyro.cpp
     src/sim/models/SimMagnetometer.cpp
+    src/sim/models/SimTorquer.cpp
 )
 target_sources(sim_models PUBLIC
     src/sim/models/SimGyro.hpp
     src/sim/models/SimMagnetometer.hpp
+    src/sim/models/SimTorquer.hpp
 )
 target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
@@ -81,6 +83,16 @@ target_sources(fsw_core INTERFACE
     src/fsw/core/DataStore.hpp
 )
 target_link_libraries(fsw_core INTERFACE common)
+
+# --- FSW GNC ---
+add_library(fsw_gnc STATIC
+    src/fsw/gnc/control/Bdot.cpp
+)
+target_sources(fsw_gnc PUBLIC
+    src/fsw/gnc/control/Bdot.hpp
+)
+target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(fsw_gnc PUBLIC common)
 
 # --- Tests ---
 enable_testing()
