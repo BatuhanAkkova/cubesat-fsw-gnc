@@ -75,19 +75,6 @@ target_sources(sim_models PUBLIC
 target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
 
-# --- FSW Core ---
-add_library(fsw_core STATIC
-    src/fsw/core/ModeManager.cpp
-    src/fsw/core/TaskScheduler.cpp
-)
-target_sources(fsw_core PUBLIC
-    src/fsw/core/DataStore.hpp
-    src/fsw/core/ModeManager.hpp
-    src/fsw/core/TaskScheduler.hpp
-)
-target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(fsw_core PUBLIC common fsw_gnc)
-
 # --- FSW GNC ---
 add_library(fsw_gnc STATIC
     src/fsw/gnc/control/Bdot.cpp
@@ -104,6 +91,31 @@ target_sources(fsw_gnc PUBLIC
 )
 target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(fsw_gnc PUBLIC common)
+
+# --- FSW FDIR ---
+add_library(fsw_fdir STATIC
+    src/fsw/fdir/FDIRManager.cpp
+)
+target_sources(fsw_fdir PUBLIC
+    src/fsw/fdir/FDIRConfig.hpp
+    src/fsw/fdir/SensorHealthMonitor.hpp
+    src/fsw/fdir/FDIRManager.hpp
+)
+target_include_directories(fsw_fdir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(fsw_fdir PUBLIC common)
+
+# --- FSW Core ---
+add_library(fsw_core STATIC
+    src/fsw/core/ModeManager.cpp
+    src/fsw/core/TaskScheduler.cpp
+)
+target_sources(fsw_core PUBLIC
+    src/fsw/core/DataStore.hpp
+    src/fsw/core/ModeManager.hpp
+    src/fsw/core/TaskScheduler.hpp
+)
+target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(fsw_core PUBLIC common fsw_gnc fsw_fdir)
 
 # --- Tests ---
 enable_testing()

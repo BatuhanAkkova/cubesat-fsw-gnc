@@ -43,6 +43,13 @@ public:
      */
     void update_quat(const common::Quaternion& q_meas, const common::Matrix3& R);
 
+    /**
+     * @brief Reset filter to initial conditions (for FDIR recovery)
+     * 
+     * Reinitializes to identity attitude, zero bias, and high uncertainty
+     */
+    void reset();
+
     // Getters
     common::Quaternion getAttitude() const { return q_est_; }
     common::Vector3 getBias() const { return beta_est_; }

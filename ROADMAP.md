@@ -2,7 +2,7 @@
 
 This roadmap outlines the step-by-step implementation of the algorithms and project structure defined in `enhanced_project_structure.md`. The approach is iterative, starting from the core infrastructure and moving towards complex GNC algorithms.
 
-## Phase 1: Foundation & Core Infrastructure
+## [x]Phase 1: Foundation & Core Infrastructure
 **Goal**: Establish the build system, common math types, and the central data exchange mechanism.
 
 1.  **Project Scaffolding**: Setup `CMakeLists.txt` and directory structure (`src/`, `config/`, `tools/`).
@@ -16,7 +16,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     *   Define the message topics and data structures (e.g., `GyroMsg`, `ControlCmd`).
     *   *Verification*: Unit test ensuring multiple threads can publish/subscribe safely.
 
-## Phase 2: Hardware Abstraction & Simulation Environment
+## [x]Phase 2: Hardware Abstraction & Simulation Environment
 **Goal**: Create the "World" where code runs and the Interfaces it talks to.
 
 1.  **HAL Interfaces**:
@@ -29,7 +29,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     *   Create `SimGyro` and `SimMagnetometer` inheriting from HAL interfaces.
     *   Feed ground truth dynamics from `RigidBody` into these sensors (adding noise is optional for now).
 
-## Phase 3: Basic GNC - The "Safe Mode" (B-Dot)
+## [x]Phase 3: Basic GNC - The "Safe Mode" (B-Dot)
 **Goal**: Get the satellite to stable state (Detumble) using the simplest algorithm.
 
 1.  **B-Dot Controller**:
@@ -43,7 +43,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     *   Initialize `RigidBody` with high initial angular rates.
     *   Run simulation and verify rates assume zero (or near zero) over time.
 
-## Phase 4: Attitude Determination (MEKF)
+## [x]Phase 4: Attitude Determination (MEKF)
 **Goal**: Know *where* we are pointing.
 
 1.  **MEKF Implementation**:
@@ -56,7 +56,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     *   Run simulation with known attitude.
     *   Compare MEKF estimate vs Ground Truth.
 
-## Phase 5: 3-Axis Pointing Control (PID)
+## [x]Phase 5: 3-Axis Pointing Control (PID)
 **Goal**: Point at something specific.
 
 1.  **PID Controller**:
@@ -71,7 +71,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     *   Command a 90-degree slew.
     *   Verify settling time and overshoot.
 
-## Phase 6: Scheduler & Mode Management
+## [x]Phase 6: Scheduler & Mode Management
 **Goal**: Automate the switching between behaviors.
 
 1.  **Mode Manager**:
@@ -81,23 +81,56 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
 3.  **Full Mission Simulation**:
     *   Simulate: Deploy -> High Rate -> Detumble -> Sun Pointing.
 
-## Phase 7: Refinement
+## [x]Phase 7: Refinement
 1.  **Orbit Propagator**: Upgrade from Keplerian to J2 (SGP4-like) in `src/fsw/gnc/ekf/OrbitEst.cpp`.
 2.  **Wheel Desaturation**: Implement logic to fire Torquers when Wheel speed > Limit.
 3.  **FDIR**: meaningful checks (e.g., "If Gyro reading stuck, reset").
 4.  **B-field Model**: Implement time-varying B-field model (IGRF + orbital motion).
 
-## Phase 8: Advanced Control & Optimization
+## []Phase 8: Advanced Control & Optimization
 **Goal**: Improve pointing accuracy and robustness.
 
 1.  **LQG Controller**: Implement Linear Quadratic Gaussian controller to combine MEKF state with optimal control inputs.
 2.  **Parameter Optimization**: Use genetic algorithms or Bayesian optimization to tune PID/LQG gains automatically.
 3.  **Robustness Analysis**: Simulate various failure modes (e.g., 50% sensor failure) and verify system stability.
 
-## Phase 9: Mission Operations & Ground Segment
+## []Phase 9: Mission Operations & Ground Segment
 **Goal**: Complete the end-to-end mission lifecycle.
 
 1.  **Telemetry Encoding**: Implement CCSDS packet encoding for attitude, orbit, and health data.
 2.  **Command Parsing**: Implement command handling logic (e.g., "Slew to Nadir", "Start Science Mode").
 3.  **Ground Station Simulation**: Create a simple `GroundStation` class to send commands and receive telemetry.
 4.  **Mission Scripting**: Create scripts to simulate a full mission timeline (deployment, detumble, pointing, data downlink).
+5.  **Performance profiling** - measure actual overhead in full mission simulation
+
+# []Phase 10: Simulation and Visualization in Python
+
+1. **Simulation and Visualization in Python**
+    * Implement a Python simulation environment to test the FSW code.
+    * Create visualizations to verify the FSW code's behavior.
+
+## []Phase 11: Hardware Integration (HIL)
+**Goal**: Transition from simulation to real hardware.
+
+1.  **Hardware Interface Layer**: Refine HAL interfaces to support real sensors and actuators.
+2.  **Hardware-in-the-Loop (HIL)**:
+    *   Connect real sensors (Gyro, Mag) to the simulation.
+    *   Connect real actuators (Torquers, Wheels) to the simulation.
+    *   Verify the FSW code works with real hardware latency and noise.
+3.  **Flight Software Deployment**: Deploy the FSW to the flight computer.
+4.  **Ground Testing**: Conduct thermal vacuum (TVAC) and vibration testing.
+
+# []Phase 12: Example Simulations
+**Goal**: Create sample simulations to test the entire system.
+
+1. **Example Simulation 1**: Detumble Simulation
+    * Initialize RigidBody with high angular rates.
+    * Run B-Dot controller to stabilize the satellite.
+    * Verify rates assume zero (or near zero) over time.
+2. **Example Simulation 2**: Pointing Simulation
+    * Initialize RigidBody with known attitude.
+    * Run PID controller to point at a specific target.
+    * Verify settling time and overshoot.
+3. **Example Simulation 3**: Full Mission Simulation
+    * Simulate: Deploy -> High Rate -> Detumble -> Sun Pointing.
+    * Verify the entire system works together.

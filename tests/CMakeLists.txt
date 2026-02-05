@@ -42,6 +42,13 @@ target_link_libraries(phase7_integration_test PRIVATE sim_engine sim_models fsw_
 add_executable(wheel_desaturation_demo wheel_desaturation_demo.cpp)
 target_link_libraries(wheel_desaturation_demo PRIVATE sim_engine sim_models fsw_gnc common)
 
+# FDIR Tests
+add_executable(sensor_health_test fdir/sensor_health_test.cpp)
+target_link_libraries(sensor_health_test PRIVATE fsw_fdir common gtest_main)
+
+add_executable(fdir_integration_test fdir/fdir_integration_test.cpp)
+target_link_libraries(fdir_integration_test PRIVATE fsw_fdir fsw_core sim_engine sim_models fsw_gnc common gtest_main)
+
 include(GoogleTest)
 gtest_discover_tests(test_math)
 gtest_discover_tests(test_datastore)
@@ -53,4 +60,6 @@ gtest_discover_tests(phase7_integration_test)
 gtest_discover_tests(mode_manager_test)
 gtest_discover_tests(task_scheduler_test)
 gtest_discover_tests(phase6_mission_test)
+gtest_discover_tests(sensor_health_test)
+gtest_discover_tests(fdir_integration_test)
 

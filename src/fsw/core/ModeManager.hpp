@@ -16,6 +16,7 @@ namespace core {
 enum class MissionMode {
     SAFE,        // B-Dot detumbling mode
     NOMINAL,     // Normal pointing/control mode
+    DEGRADED,    // Operation with reduced sensor confidence
     CONTINGENCY  // Emergency fallback (future use)
 };
 
@@ -73,6 +74,17 @@ public:
     void setModeChangeCallback(ModeChangeCallback callback) {
         mode_change_callback_ = callback;
     }
+
+    /**
+     * @brief Force mode change (bypasses timing constraints)
+     * 
+     * Used by FDIR to transition immediately during critical failures.
+     * Unlike commandMode(), this does not check minimum time in mode.
+     * 
+     * @param new_mode Target mode
+     * @param reason Reason for forced transition (logged)
+     */
+    void forceModeChange(MissionMode new_mode, const std::string& reason);
 
     /**
      * @brief Get time in current mode

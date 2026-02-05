@@ -16,7 +16,8 @@ static constexpr double DIPOLE_TILT = 11.0 * M_PI / 180.0;
 
 SimMagnetometer::SimMagnetometer(const dynamics::RigidBody& body, const dynamics::Orbit& orbit,
                                  const Config& config)
-    : body_(body), orbit_(orbit), config_(config), sim_time_(0.0) {}
+    : body_(body), orbit_(orbit), config_(config), sim_time_(0.0), 
+      gen_(std::random_device{}()), dist_(0.0, config.noise_std) {}
 
 
 void SimMagnetometer::setTime(double time_sec) {
@@ -31,6 +32,15 @@ common::Vector3 SimMagnetometer::read() {
     // q_b_to_i * v_b = v_i => v_b = q_b_to_i.inverse() * v_i
     common::Quaternion q_b_to_i = body_.getAttitude();
     common::Vector3 b_body = q_b_to_i.inverse() * b_eci;
+
+    // Add bias
+    b_body += config_.bias;
+
+    if (config_.noise_std > 0.0) {
+        b_body.x() += dist_(gen_);
+        b_body.y() += dist_(gen_);
+        b_body.z() += dist_(gen_);
+    }
 
     return b_body;
 }

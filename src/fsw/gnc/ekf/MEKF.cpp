@@ -1,4 +1,5 @@
 #include "MEKF.hpp"
+#include "common/logger.hpp"
 #include <iostream>
 
 namespace fsw {
@@ -112,6 +113,18 @@ void MEKF::update_quat(const common::Quaternion& q_meas, const common::Matrix3& 
     // P = (I - K*H) * P
     common::MatrixX I6 = common::MatrixX::Identity(6, 6);
     P_ = (I6 - K * H) * P_; // Note: Joseph form is more robust but this is standard
+}
+
+void MEKF::reset() {
+    // Reset to identity attitude and zero bias
+    q_est_.setIdentity();
+    beta_est_.setZero();
+    
+    // Set high initial uncertainty (conservative reset)
+    P_.setIdentity(6, 6);
+    P_ *= 1.0;  // 1 rad^2 for attitude error, 1 rad^2/s^2 for bias
+    
+    common::LogWarning("[MEKF] Filter reset to initial conditions");
 }
 
 } // namespace ekf

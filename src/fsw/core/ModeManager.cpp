@@ -102,10 +102,28 @@ void ModeManager::reset() {
     transitionToMode(MissionMode::SAFE);
 }
 
+void ModeManager::forceModeChange(MissionMode new_mode, const std::string& reason) {
+    if (new_mode == current_mode_) {
+        common::LogWarning("FDIR force mode change ignored - already in {} mode: {}", 
+                          getModeString(new_mode), reason);
+        return;
+    }
+    
+    common::LogWarning("FDIR forcing mode change: {} -> {} - Reason: {}", 
+                      getModeString(current_mode_),
+                      getModeString(new_mode),
+                      reason);
+    
+    // Bypass timing constraint - go directly to transition
+    transitionToMode(new_mode);
+}
+
+
 std::string ModeManager::getModeString(MissionMode mode) {
     switch (mode) {
         case MissionMode::SAFE:       return "SAFE";
         case MissionMode::NOMINAL:    return "NOMINAL";
+        case MissionMode::DEGRADED:   return "DEGRADED";
         case MissionMode::CONTINGENCY: return "CONTINGENCY";
         default:                      return "UNKNOWN";
     }

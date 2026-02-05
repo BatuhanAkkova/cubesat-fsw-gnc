@@ -2,6 +2,7 @@
 #include "hal/interfaces/IMagnetometer.hpp"
 #include "sim/dynamics/RigidBody.hpp"
 #include "sim/dynamics/Orbit.hpp"
+#include <random>
 
 namespace sim {
 namespace models {
@@ -17,6 +18,8 @@ public:
     struct Config {
         bool enable_earth_rotation = true;  // Enable time-varying field due to Earth rotation
         bool use_tilted_dipole = false;     // Use tilted dipole (11 deg offset)
+        double noise_std = 0.0;             // Standard deviation of noise [Tesla]
+        common::Vector3 bias = common::Vector3::Zero(); // Hard-iron bias [Tesla]
     };
 
     /**
@@ -41,6 +44,9 @@ private:
     const dynamics::Orbit& orbit_;
     Config config_;
     double sim_time_;  // Simulation time [s]
+
+    mutable std::mt19937 gen_;
+    mutable std::normal_distribution<double> dist_;
 
     // Compute Earth's magnetic field in Inertial (ECI) frame using dipole model
     common::Vector3 computeDipoleField(const common::Vector3& pos_eci, double time_sec) const;
