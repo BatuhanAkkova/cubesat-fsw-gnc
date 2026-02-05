@@ -42,6 +42,14 @@ target_link_libraries(phase7_integration_test PRIVATE sim_engine sim_models fsw_
 add_executable(wheel_desaturation_demo wheel_desaturation_demo.cpp)
 target_link_libraries(wheel_desaturation_demo PRIVATE sim_engine sim_models fsw_gnc common)
 
+# LQG Controller Test
+add_executable(lqg_controller_test fsw/lqg_controller_test.cpp)
+target_link_libraries(lqg_controller_test PRIVATE fsw_gnc common gtest_main)
+
+# LQG Performance Demo
+add_executable(lqg_performance_demo fsw/lqg_performance_demo.cpp)
+target_link_libraries(lqg_performance_demo PRIVATE sim_engine sim_models fsw_gnc common gtest_main)
+
 # FDIR Tests
 add_executable(sensor_health_test fdir/sensor_health_test.cpp)
 target_link_libraries(sensor_health_test PRIVATE fsw_fdir common gtest_main)
@@ -62,4 +70,5 @@ gtest_discover_tests(task_scheduler_test)
 gtest_discover_tests(phase6_mission_test)
 gtest_discover_tests(sensor_health_test)
 gtest_discover_tests(fdir_integration_test)
-
+gtest_discover_tests(lqg_controller_test)
+gtest_discover_tests(lqg_performance_demo)

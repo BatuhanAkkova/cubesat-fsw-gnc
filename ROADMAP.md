@@ -87,10 +87,10 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
 3.  **FDIR**: meaningful checks (e.g., "If Gyro reading stuck, reset").
 4.  **B-field Model**: Implement time-varying B-field model (IGRF + orbital motion).
 
-## []Phase 8: Advanced Control & Optimization
+## [-]Phase 8: Advanced Control & Optimization
 **Goal**: Improve pointing accuracy and robustness.
 
-1.  **LQG Controller**: Implement Linear Quadratic Gaussian controller to combine MEKF state with optimal control inputs.
+1.  **LQG Controller**: Implement Linear Quadratic Gaussian controller to combine MEKF state with optimal control inputs. IMPLEMENTED
 2.  **Parameter Optimization**: Use genetic algorithms or Bayesian optimization to tune PID/LQG gains automatically.
 3.  **Robustness Analysis**: Simulate various failure modes (e.g., 50% sensor failure) and verify system stability.
 
@@ -109,18 +109,7 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
     * Implement a Python simulation environment to test the FSW code.
     * Create visualizations to verify the FSW code's behavior.
 
-## []Phase 11: Hardware Integration (HIL)
-**Goal**: Transition from simulation to real hardware.
-
-1.  **Hardware Interface Layer**: Refine HAL interfaces to support real sensors and actuators.
-2.  **Hardware-in-the-Loop (HIL)**:
-    *   Connect real sensors (Gyro, Mag) to the simulation.
-    *   Connect real actuators (Torquers, Wheels) to the simulation.
-    *   Verify the FSW code works with real hardware latency and noise.
-3.  **Flight Software Deployment**: Deploy the FSW to the flight computer.
-4.  **Ground Testing**: Conduct thermal vacuum (TVAC) and vibration testing.
-
-# []Phase 12: Example Simulations
+# []Phase 11: Example Simulations
 **Goal**: Create sample simulations to test the entire system.
 
 1. **Example Simulation 1**: Detumble Simulation
@@ -134,3 +123,14 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
 3. **Example Simulation 3**: Full Mission Simulation
     * Simulate: Deploy -> High Rate -> Detumble -> Sun Pointing.
     * Verify the entire system works together.
+
+## []Phase 12: Hardware Integration (HIL)
+**Goal**: Transition from simulation to real hardware.
+
+1.  **Hardware Interface Layer**: Refine HAL interfaces to support real sensors and actuators.
+2.  **Hardware-in-the-Loop (HIL)**:
+    *   Connect real sensors (Gyro, Mag) to the simulation.
+    *   Connect real actuators (Torquers, Wheels) to the simulation.
+    *   Verify the FSW code works with real hardware latency and noise.
+3.  **Flight Software Deployment**: Deploy the FSW to the flight computer.
+4.  **Ground Testing**: Conduct thermal vacuum (TVAC) and vibration testing.

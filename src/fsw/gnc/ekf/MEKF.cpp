@@ -23,15 +23,13 @@ void MEKF::predict(const common::Vector3& gyro_meas, double dt, const common::Ma
     // 1. Propagate Nominal State
     common::Vector3 omega_est = gyro_meas - beta_est_;
     
-    // Kinematics for q_IB (Inertial -> Body): q_dot = -0.5 * omega * q
-    common::Quaternion omega_q(0, omega_est.x(), omega_est.y(), omega_est.z()); // w, x, y, z
-    
-    // Eigen q1 * q2 is quaternion multiplication
-    // q_dot = -0.5 * omega_q * q_est_
-    common::Quaternion q_dot = omega_q * q_est_;
-    q_dot.coeffs() *= -0.5;
+    // Kinematics: q_dot = 0.5 * q * omega
+    // Consistent with RigidBody for identical integration
+    common::Quaternion omega_q(0, omega_est.x(), omega_est.y(), omega_est.z());
+    common::Quaternion q_dot = q_est_ * omega_q;
+    q_dot.coeffs() *= 0.5;
 
-    // Simple Euler integration for now (or midpoint)
+    // Simple Euler integration
     q_est_.coeffs() += q_dot.coeffs() * dt;
     q_est_.normalize();
 
@@ -52,7 +50,7 @@ void MEKF::predict(const common::Vector3& gyro_meas, double dt, const common::Ma
                    -omega_est.y(), omega_est.x(), 0;
                    
     F.block<3, 3>(0, 0) = -omega_cross;
-    F.block<3, 3>(0, 3) = common::Matrix3::Identity(); // +I relationship to bias
+    F.block<3, 3>(0, 3) = -common::Matrix3::Identity(); // Correct sign for bias error coupling
 
     // Discretize F -> Phi = I + F*dt
     common::MatrixX Phi = common::MatrixX::Identity(6, 6) + F * dt;
