@@ -45,6 +45,7 @@ target_sources(hal_interfaces INTERFACE
     src/hal/interfaces/IMagnetometer.hpp
     src/hal/interfaces/ITorquer.hpp
     src/hal/interfaces/IRW.hpp
+    src/hal/interfaces/IStarTracker.hpp
 )
 target_link_libraries(hal_interfaces INTERFACE common)
 
@@ -68,11 +69,13 @@ add_library(sim_models STATIC
     src/sim/models/SimGyro.cpp
     src/sim/models/SimMagnetometer.cpp
     src/sim/models/SimTorquer.cpp
+    src/sim/models/SimStarTracker.cpp
 )
 target_sources(sim_models PUBLIC
     src/sim/models/SimGyro.hpp
     src/sim/models/SimMagnetometer.hpp
     src/sim/models/SimTorquer.hpp
+    src/sim/models/SimStarTracker.hpp
 )
 target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
@@ -87,9 +90,11 @@ target_link_libraries(fsw_core INTERFACE common)
 # --- FSW GNC ---
 add_library(fsw_gnc STATIC
     src/fsw/gnc/control/Bdot.cpp
+    src/fsw/gnc/ekf/MEKF.cpp
 )
 target_sources(fsw_gnc PUBLIC
     src/fsw/gnc/control/Bdot.hpp
+    src/fsw/gnc/ekf/MEKF.hpp
 )
 target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(fsw_gnc PUBLIC common)
