@@ -70,22 +70,30 @@ add_library(sim_models STATIC
     src/sim/models/SimMagnetometer.cpp
     src/sim/models/SimTorquer.cpp
     src/sim/models/SimStarTracker.cpp
+    src/sim/models/SimRW.cpp
 )
 target_sources(sim_models PUBLIC
     src/sim/models/SimGyro.hpp
     src/sim/models/SimMagnetometer.hpp
     src/sim/models/SimTorquer.hpp
     src/sim/models/SimStarTracker.hpp
+    src/sim/models/SimRW.hpp
 )
 target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
 
 # --- FSW Core ---
-add_library(fsw_core INTERFACE)
-target_sources(fsw_core INTERFACE
-    src/fsw/core/DataStore.hpp
+add_library(fsw_core STATIC
+    src/fsw/core/ModeManager.cpp
+    src/fsw/core/TaskScheduler.cpp
 )
-target_link_libraries(fsw_core INTERFACE common)
+target_sources(fsw_core PUBLIC
+    src/fsw/core/DataStore.hpp
+    src/fsw/core/ModeManager.hpp
+    src/fsw/core/TaskScheduler.hpp
+)
+target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(fsw_core PUBLIC common fsw_gnc)
 
 # --- FSW GNC ---
 add_library(fsw_gnc STATIC
@@ -95,6 +103,9 @@ add_library(fsw_gnc STATIC
 target_sources(fsw_gnc PUBLIC
     src/fsw/gnc/control/Bdot.hpp
     src/fsw/gnc/ekf/MEKF.hpp
+    src/fsw/gnc/control/PID.hpp
+    src/fsw/gnc/control/AttitudeController.hpp
+    src/fsw/gnc/guidance/PointingStrategies.hpp
 )
 target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(fsw_gnc PUBLIC common)

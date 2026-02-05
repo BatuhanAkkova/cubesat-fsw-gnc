@@ -20,5 +20,6 @@ using MatrixX = Eigen::MatrixXd;
 // Quaternion type (Eigen stores complex part first: x, y, z, w internally, 
 // but constructor is w, x, y, z)
 using Quaternion = Eigen::Quaterniond;
+using AngleAxis = Eigen::AngleAxisd;
 
 } // namespace common

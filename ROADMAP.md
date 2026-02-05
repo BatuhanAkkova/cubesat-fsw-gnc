@@ -85,3 +85,4 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
 1.  **Orbit Propagator**: Upgrade from Keplerian to J2 (SGP4-like) in `src/fsw/gnc/ekf/OrbitEst.cpp`.
 2.  **Wheel Desaturation**: Implement logic to fire Torquers when Wheel speed > Limit.
 3.  **FDIR**: meaningful checks (e.g., "If Gyro reading stuck, reset").
+4.  **B-field Model**: Implement time-varying B-field model (IGRF + orbital motion).

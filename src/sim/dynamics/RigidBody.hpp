@@ -18,8 +18,13 @@ public:
      * @brief Propagate dynamics by one time step
      * @param dt Time step [s]
      * @param external_torque External torque vector [Nm] in Body frame
+     * @param internal_torque Torque from internal components (e.g. RW) [Nm] in Body frame
+     * @param internal_momentum Momentum of internal components [Nms] in Body frame
      */
-    void step(double dt, const common::Vector3& external_torque);
+    void step(double dt, 
+              const common::Vector3& external_torque, 
+              const common::Vector3& internal_torque = common::Vector3::Zero(),
+              const common::Vector3& internal_momentum = common::Vector3::Zero());
 
     common::Quaternion getAttitude() const;
     common::Vector3 getAngularVelocity() const;
@@ -32,7 +37,10 @@ private:
     // Note: Eigen stores Quaternion as x, y, z, w
     common::VectorX state_; 
 
-    common::VectorX dynamics(double t, const common::VectorX& y, const common::Vector3& torque);
+    common::VectorX dynamics(double t, const common::VectorX& y, 
+                             const common::Vector3& external_torque,
+                             const common::Vector3& internal_torque,
+                             const common::Vector3& internal_momentum);
 };
 
 } // namespace dynamics

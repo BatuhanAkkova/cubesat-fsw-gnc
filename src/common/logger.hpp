@@ -27,6 +27,11 @@ inline void LogError(spdlog::format_string_t<Args...> fmt, Args &&...args) {
 }
 
 template<typename... Args>
+inline void LogWarning(spdlog::format_string_t<Args...> fmt, Args &&...args) {
+    spdlog::warn(fmt, std::forward<Args>(args)...);
+}
+
+template<typename... Args>
 inline void LogDebug(spdlog::format_string_t<Args...> fmt, Args &&...args) {
     spdlog::debug(fmt, std::forward<Args>(args)...);
 }

@@ -12,7 +12,10 @@ RigidBody::RigidBody(const common::Matrix3& inertia, const common::Quaternion& i
     state_.segment<3>(4) = init_omega;
 }
 
-common::VectorX RigidBody::dynamics(double, const common::VectorX& y, const common::Vector3& torque) {
+common::VectorX RigidBody::dynamics(double, const common::VectorX& y, 
+                                 const common::Vector3& external_torque,
+                                 const common::Vector3& internal_torque,
+                                 const common::Vector3& internal_momentum) {
     // Unpack state
     common::Vector4 q_coeffs = y.segment<4>(0);
     common::Quaternion q(q_coeffs(3), q_coeffs(0), q_coeffs(1), q_coeffs(2)); // w, x, y, z construction
@@ -26,11 +29,11 @@ common::VectorX RigidBody::dynamics(double, const common::VectorX& y, const comm
     common::Quaternion q_dot = q * omega_q;
     q_dot.coeffs() *= 0.5;
 
-    // 2. Attitude Dynamics: I * omega_dot + omega x (I * omega) = torque
-    // omega_dot = I_inv * (torque - omega x (I * omega))
-    common::Vector3 Iw = inertia_ * omega;
-    common::Vector3 w_cross_Iw = omega.cross(Iw);
-    common::Vector3 omega_dot = inertia_inv_ * (torque - w_cross_Iw);
+    // 2. Attitude Dynamics: I * omega_dot + omega x (I * omega + H_int) = tau_ext + tau_int
+    // omega_dot = I_inv * (tau_ext + tau_int - omega x (I * omega + H_int))
+    common::Vector3 total_h = inertia_ * omega + internal_momentum;
+    common::Vector3 w_cross_h = omega.cross(total_h);
+    common::Vector3 omega_dot = inertia_inv_ * (external_torque + internal_torque - w_cross_h);
 
     common::VectorX dydt(7);
     dydt.segment<4>(0) = q_dot.coeffs();
@@ -39,9 +42,12 @@ common::VectorX RigidBody::dynamics(double, const common::VectorX& y, const comm
     return dydt;
 }
 
-void RigidBody::step(double dt, const common::Vector3& external_torque) {
-    auto f = [this, external_torque](double t, const common::VectorX& y) {
-        return this->dynamics(t, y, external_torque);
+void RigidBody::step(double dt, 
+                  const common::Vector3& external_torque,
+                  const common::Vector3& internal_torque,
+                  const common::Vector3& internal_momentum) {
+    auto f = [this, external_torque, internal_torque, internal_momentum](double t, const common::VectorX& y) {
+        return this->dynamics(t, y, external_torque, internal_torque, internal_momentum);
     };
 
     state_ = engine::Integrator<common::VectorX>::rk4(0.0, state_, dt, f);
