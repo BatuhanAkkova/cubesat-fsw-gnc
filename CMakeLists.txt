@@ -23,12 +23,6 @@ target_link_libraries(core_lib INTERFACE
     spdlog::spdlog
 )
 
-# Source subdirectories (We'll add files here later, for now just setting up structure)
-# For now, since we haven't created the source files yet, we won't add_subdirectory(src) 
-# until we populate it to avoid CMake errors about empty targets if we were to make them there.
-# Instead, we will define the library targets as we create the files.
-
-# --- Common ---
 # --- Common ---
 add_library(common INTERFACE)
 target_sources(common INTERFACE
@@ -54,8 +48,7 @@ add_library(sim_engine STATIC
     src/sim/dynamics/RigidBody.cpp
     src/sim/dynamics/Orbit.cpp
 )
-# Integrator.hpp is a template header, so it doesn't need to be compiled, 
-# but we can list it for IDEs.
+
 target_sources(sim_engine PUBLIC
     src/sim/engine/Integrator.hpp
     src/sim/dynamics/RigidBody.hpp
@@ -99,12 +92,14 @@ target_link_libraries(fsw_core PUBLIC common fsw_gnc)
 add_library(fsw_gnc STATIC
     src/fsw/gnc/control/Bdot.cpp
     src/fsw/gnc/ekf/MEKF.cpp
+    src/fsw/gnc/control/WheelDesaturation.cpp
 )
 target_sources(fsw_gnc PUBLIC
     src/fsw/gnc/control/Bdot.hpp
     src/fsw/gnc/ekf/MEKF.hpp
     src/fsw/gnc/control/PID.hpp
     src/fsw/gnc/control/AttitudeController.hpp
+    src/fsw/gnc/control/WheelDesaturation.hpp
     src/fsw/gnc/guidance/PointingStrategies.hpp
 )
 target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

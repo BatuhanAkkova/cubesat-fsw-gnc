@@ -86,3 +86,18 @@ This roadmap outlines the step-by-step implementation of the algorithms and proj
 2.  **Wheel Desaturation**: Implement logic to fire Torquers when Wheel speed > Limit.
 3.  **FDIR**: meaningful checks (e.g., "If Gyro reading stuck, reset").
 4.  **B-field Model**: Implement time-varying B-field model (IGRF + orbital motion).
+
+## Phase 8: Advanced Control & Optimization
+**Goal**: Improve pointing accuracy and robustness.
+
+1.  **LQG Controller**: Implement Linear Quadratic Gaussian controller to combine MEKF state with optimal control inputs.
+2.  **Parameter Optimization**: Use genetic algorithms or Bayesian optimization to tune PID/LQG gains automatically.
+3.  **Robustness Analysis**: Simulate various failure modes (e.g., 50% sensor failure) and verify system stability.
+
+## Phase 9: Mission Operations & Ground Segment
+**Goal**: Complete the end-to-end mission lifecycle.
+
+1.  **Telemetry Encoding**: Implement CCSDS packet encoding for attitude, orbit, and health data.
+2.  **Command Parsing**: Implement command handling logic (e.g., "Slew to Nadir", "Start Science Mode").
+3.  **Ground Station Simulation**: Create a simple `GroundStation` class to send commands and receive telemetry.
+4.  **Mission Scripting**: Create scripts to simulate a full mission timeline (deployment, detumble, pointing, data downlink).
