@@ -1,0 +1,5 @@
+build/
+.vscode/
+# CMake files (keeping them for now as they are part of the source)
+# bin/ 
+# lib/
