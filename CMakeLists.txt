@@ -48,6 +48,7 @@ add_library(sim_engine STATIC
     src/sim/dynamics/RigidBody.cpp
     src/sim/dynamics/Orbit.cpp
     src/sim/Simulation.cpp
+    src/sim/GroundStation.cpp
 )
 
 target_sources(sim_engine PUBLIC
@@ -55,6 +56,7 @@ target_sources(sim_engine PUBLIC
     src/sim/dynamics/RigidBody.hpp
     src/sim/dynamics/Orbit.hpp
     src/sim/Simulation.hpp
+    src/sim/GroundStation.hpp
 )
 target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_engine PUBLIC common)
@@ -112,12 +114,19 @@ target_link_libraries(fsw_fdir PUBLIC common)
 add_library(fsw_core STATIC
     src/fsw/core/ModeManager.cpp
     src/fsw/core/TaskScheduler.cpp
+    src/fsw/core/CommandManager.cpp
+    src/fsw/core/CommandParser.cpp
     src/fsw/FlightSoftware.cpp
 )
 target_sources(fsw_core PUBLIC
     src/fsw/core/DataStore.hpp
     src/fsw/core/ModeManager.hpp
     src/fsw/core/TaskScheduler.hpp
+    src/fsw/core/Command.hpp
+    src/fsw/core/CommandManager.hpp
+    src/fsw/core/CommandParser.hpp
+    src/fsw/core/commands/SlewToNadirCommand.hpp
+    src/fsw/telemetry/CommandProtocol.hpp
     src/fsw/FlightSoftware.hpp
 )
 target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)

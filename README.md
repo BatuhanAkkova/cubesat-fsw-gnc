@@ -21,6 +21,10 @@ This repository contains a complete FSW stack including attitude determination, 
     -   J2 Perturbation orbit propagation.
     -   Realistic sensor/actuator models with noise and latency.
 -   **FDIR (Fault Detection, Isolation, and Recovery)**: Sensor health monitoring and automatic mode switching.
+-   **Communication & Command**:
+    -   **CCSDS Telemetry**: Packet encoding for attitude, orbit, and health data.
+    -   **Command Handling**: Robust command parsing and execution (e.g., "Slew to Nadir", "Set PID Gains").
+    -   **Ground Station Simulation**: Simulated ground segment for commanding and telemetry monitoring.
 -   **Optimization**: Genetic algorithms for automatic controller gain tuning and Monte Carlo robustness analysis.
 
 ## Project Structure
@@ -29,11 +33,12 @@ This repository contains a complete FSW stack including attitude determination, 
 ├── src/
 │   ├── common/         # Common math types, time, and logging utilities
 │   ├── fsw/            # Flight Software core
-│   │   ├── core/       # DataStore, ModeManager, TaskScheduler
+│   │   ├── core/       # DataStore, ModeManager, TaskScheduler, Command Handling
 │   │   ├── gnc/        # MEKF, PID, B-Dot, Pointing Strategies
-│   │   └── fdir/       # Fault Detection and Recovery
+│   │   ├── fdir/       # Fault Detection and Recovery
+│   │   └── telemetry/  # CCSDS Telemetry Encoding
 │   ├── hal/            # Hardware Abstraction Layer interfaces
-│   ├── sim/            # Simulation engine and hardware models
+│   ├── sim/            # Simulation engine, hardware models, and Ground Station
 │   └── opt/            # Optimization tools (Genetic Algorithms)
 ├── tests/              # Unit tests and integration/mission demos
 ```
@@ -66,26 +71,23 @@ ctest -C Release --output-on-failure
 
 The following phases are planned for upcoming development cycles:
 
-### [ ] Phase 9: Mission Operations & Ground Segment
--   **Telemetry Encoding**: CCSDS packet encoding for attitude, orbit, and health data.
--   **Command Parsing**: Implement command handling logic (e.g., "Slew to Nadir").
--   **Ground Station Simulation**: Class to send commands and receive telemetry.
--   **Mission Scripting**: Full mission timeline simulation (Deployment -> Science -> Downlink).
--   **Performance profiling**: Measure actual overhead in full mission simulation.
+### Mission Operations & Ground Segment
+-   [ ]**Mission Scripting**: Full mission timeline simulation (Deployment -> Science -> Downlink).
+-   [ ]**Performance profiling**: Measure actual overhead in full mission simulation.
 
-### [ ] Phase 10: Simulation and Visualization in Python
--   Implement a Python-based simulation environment for rapid prototyping.
--   Create 3D visualizations for attitude and orbit verification.
+### Simulation and Visualization in Python
+-   [ ]Implement a Python-based simulation environment for rapid prototyping.
+-   [ ]Create 3D visualizations for attitude and orbit verification.
 
-### [ ] Phase 11: Example Simulations
--   **Detumble Simulation**: Verify B-Dot performance from high tip-off rates.
--   **Pointing Simulation**: Verify PID/LQG slew performance and settling time.
--   **Full Mission Simulation**: End-to-end verification (Deploy -> Detumble -> Pointing).
+### Example Simulations
+-   [ ]**Detumble Simulation**: Verify B-Dot performance from high tip-off rates.
+-   [ ]**Pointing Simulation**: Verify PID/LQG slew performance and settling time.
+-   [ ]**Full Mission Simulation**: End-to-end verification (Deploy -> Detumble -> Pointing).
 
-### [ ] Phase 12: Virtual HIL
--   **Virtual Bus Interface**: Implement a virtual I2C/SPI interface.
--   **Virtual Sensors**: Implement a virtual sensor interface with quantization.
--   **Virtual Driver**: Implement a driver for FSW, virtual MPU6050.
+### Virtual HIL
+-   [ ]**Virtual Bus Interface**: Implement a virtual I2C/SPI interface.
+-   [ ]**Virtual Sensors**: Implement a virtual sensor interface with quantization.
+-   [ ]**Virtual Driver**: Implement a driver for FSW, virtual MPU6050.
 
 *Developed for advanced CubeSat mission modeling and flight software development.*
 ---

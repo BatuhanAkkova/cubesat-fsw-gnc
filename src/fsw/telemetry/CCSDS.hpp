@@ -64,5 +64,14 @@ enum class APID : uint16_t {
     HEALTH   = 102
 };
 
+/**
+ * @brief CCSDS Command Secondary Header
+ * Usually contains the function code for the command.
+ */
+struct CommandSecondaryHeader {
+    uint8_t function_code;
+    // Add more fields if needed (e.g. checksum, time tag)
+};
+
 } // namespace telemetry
 } // namespace fsw

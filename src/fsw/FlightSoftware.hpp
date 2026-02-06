@@ -6,7 +6,10 @@
 #include "fsw/gnc/control/Bdot.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
+#include "fsw/core/CommandManager.hpp"
 #include <memory>
+#include <vector>
+#include <string>
 
 namespace fsw {
 
@@ -37,9 +40,14 @@ public:
 
     /**
      * @brief Run one iteration of the FSW.
+     * @param sensors Latest sensor measurements.
+     * @param raw_commands Raw CCSDS command packets received since last step.
+     * @param dt Time step [seconds]
      * @return Commanded torque in body frame [Nm]
      */
-    common::Vector3 step(const SensorData& sensors, double dt);
+    common::Vector3 step(const SensorData& sensors, 
+                         const std::vector<std::vector<uint8_t>>& raw_commands,
+                         double dt);
 
     // Accessors for optimization/testing
     gnc::control::AttitudeController& getAttitudeController() { return *attitude_controller_; }
@@ -57,7 +65,10 @@ private:
     std::unique_ptr<gnc::control::AttitudeController> attitude_controller_;
     std::unique_ptr<gnc::control::Bdot> bdot_controller_;
     std::unique_ptr<telemetry::TelemetryManager> telemetry_manager_;
+    std::unique_ptr<core::CommandManager> command_manager_;
     
+    std::string guidance_mode_ = "SUN"; // Default pointing mode
+    common::Quaternion target_q_ = common::Quaternion::Identity();
     common::Vector3 last_torque_cmd_ = common::Vector3::Zero();
 };
 

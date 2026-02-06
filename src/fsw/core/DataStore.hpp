@@ -78,6 +78,13 @@ public:
         return false;
     }
 
+    // Clear all data and subscribers (mainly for testing)
+    void Reset() {
+        std::lock_guard<std::mutex> lock(mutex_);
+        data_map_.clear();
+        subscribers_.clear();
+    }
+
 private:
     DataStore() = default;
 

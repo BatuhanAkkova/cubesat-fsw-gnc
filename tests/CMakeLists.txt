@@ -81,3 +81,18 @@ gtest_discover_tests(controller_gain_test)
 add_executable(telemetry_test telemetry_test.cpp)
 target_link_libraries(telemetry_test PRIVATE fsw_fdir common gtest_main)
 gtest_discover_tests(telemetry_test)
+
+# Command Handling Test
+add_executable(command_parser_test command_parser_test.cpp)
+target_link_libraries(command_parser_test PRIVATE fsw_core common gtest_main)
+gtest_discover_tests(command_parser_test)
+
+# Command Integration Test
+add_executable(command_integration_test command_integration_test.cpp)
+target_link_libraries(command_integration_test PRIVATE fsw_core sim_engine sim_models common gtest_main)
+gtest_discover_tests(command_integration_test)
+
+# Ground Station Test
+add_executable(ground_station_test ground_station_test.cpp)
+target_link_libraries(ground_station_test PRIVATE sim_engine fsw_fdir common gtest_main)
+gtest_discover_tests(ground_station_test)
