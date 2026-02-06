@@ -87,11 +87,14 @@ The following phases are planned for upcoming development cycles:
 -   **Virtual Sensors**: Implement a virtual sensor interface with quantization.
 -   **Virtual Driver**: Implement a driver for FSW, virtual MPU6050.
 
+*Developed for advanced CubeSat mission modeling and flight software development.*
 ---
+
+## License
+
+MIT License. See [LICENSE](LICENSE) for details.
 
 ## Author
 
 **Batuhan Akkova**
 [Email](mailto:batuhanakkova1@gmail.com)
-
-*Developed for advanced CubeSat mission modeling and flight software development.*
