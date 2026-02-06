@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: "CubeSat Flight Software & Guidance, Navigation, and Control (GNC)"
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: "Akkova"
+    given-names: "Batuhan"
+    email: "batuhanakkova1@gmail.com"
+url: "https://github.com/BatuhanAkkova/cubesat-fsw-gnc"
+license: "MIT"
+version: "1.0.0"
+date-released: 2026-02-05
