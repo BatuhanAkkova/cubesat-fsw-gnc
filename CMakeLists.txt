@@ -97,6 +97,8 @@ target_link_libraries(fsw_gnc PUBLIC common)
 # --- FSW FDIR ---
 add_library(fsw_fdir STATIC
     src/fsw/fdir/FDIRManager.cpp
+    src/fsw/telemetry/TelemetryService.cpp
+    src/fsw/telemetry/TelemetryManager.cpp
 )
 target_sources(fsw_fdir PUBLIC
     src/fsw/fdir/FDIRConfig.hpp

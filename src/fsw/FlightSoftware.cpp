@@ -8,6 +8,7 @@ FlightSoftware::FlightSoftware(const Config& config)
     mode_manager_ = std::unique_ptr<core::ModeManager>(new core::ModeManager(config.mode_cfg));
     attitude_controller_ = std::unique_ptr<gnc::control::AttitudeController>(new gnc::control::AttitudeController(config.att_cfg));
     bdot_controller_ = std::unique_ptr<gnc::control::Bdot>(new gnc::control::Bdot(config.bdot_gain));
+    telemetry_manager_ = std::unique_ptr<telemetry::TelemetryManager>(new telemetry::TelemetryManager(core::DataStore::Instance()));
 }
 
 common::Vector3 FlightSoftware::step(const SensorData& sensors, double dt) {
@@ -35,6 +36,9 @@ common::Vector3 FlightSoftware::step(const SensorData& sensors, double dt) {
         torque_cmd = attitude_controller_->computeTorque(
             sensors.q_measured, q_target, sensors.gyro_body, dt);
     }
+
+    // Update Telemetry
+    telemetry_manager_->update(dt);
 
     last_torque_cmd_ = torque_cmd;
     return torque_cmd;

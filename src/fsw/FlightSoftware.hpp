@@ -5,6 +5,7 @@
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
+#include "fsw/telemetry/TelemetryManager.hpp"
 #include <memory>
 
 namespace fsw {
@@ -55,6 +56,7 @@ private:
     std::unique_ptr<core::ModeManager> mode_manager_;
     std::unique_ptr<gnc::control::AttitudeController> attitude_controller_;
     std::unique_ptr<gnc::control::Bdot> bdot_controller_;
+    std::unique_ptr<telemetry::TelemetryManager> telemetry_manager_;
     
     common::Vector3 last_torque_cmd_ = common::Vector3::Zero();
 };
