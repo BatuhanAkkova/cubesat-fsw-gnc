@@ -34,10 +34,8 @@ public:
      * @brief Step the wheel dynamics.
      * 
      * @param dt Time step in seconds.
-     * @return double Torque EXERTED ON THE BODY (reaction torque). 
+     * @return double Torque exerted on the body (reaction torque). 
      *                Note: Torque on Body = - (Torque on Wheel).
-     *                However, usually physics engine wants the torque applied to the body.
-     *                If motor accelerates wheel (+), it exerts (-) torque on body.
      */
     double step(double dt);
 
@@ -46,10 +44,15 @@ public:
      */
     void setSpeed(double speed_rad_s);
 
+    void injectFailure_Dead() { is_dead_ = true; }
+    void setEfficiency(double efficiency) { efficiency_ = efficiency; }
+
 private:
     Config config_;
     double current_speed_;      // rad/s
     double commanded_torque_;   // Nm
+    bool is_dead_ = false;
+    double efficiency_ = 1.0;
 };
 
 } // namespace sim

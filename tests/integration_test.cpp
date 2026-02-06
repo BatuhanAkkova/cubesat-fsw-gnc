@@ -12,10 +12,9 @@ using namespace sim::models;
 using namespace fsw::gnc::control;
 
 /**
- * @brief Integration test for Phase 7 components
- * Tests J2 orbit propagator, time-varying B-field, and wheel desaturation together
+ * @brief Integration test for J2 orbit propagator, time-varying B-field, and wheel desaturation together.
  */
-TEST(Phase7IntegrationTest, AllComponentsTogether) {
+TEST(IntegrationTest, AllComponentsTogether) {
     // === Setup Orbit with J2 ===
     double altitude = 400000.0;  // 400 km LEO
     double r = 6378137.0 + altitude;

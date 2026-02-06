@@ -1,5 +1,6 @@
 #include "SimMagnetometer.hpp"
 #include <cmath>
+#include <chrono>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -17,7 +18,8 @@ static constexpr double DIPOLE_TILT = 11.0 * M_PI / 180.0;
 SimMagnetometer::SimMagnetometer(const dynamics::RigidBody& body, const dynamics::Orbit& orbit,
                                  const Config& config)
     : body_(body), orbit_(orbit), config_(config), sim_time_(0.0), 
-      gen_(std::random_device{}()), dist_(0.0, config.noise_std) {}
+      gen_(std::chrono::system_clock::now().time_since_epoch().count()), 
+      dist_(0.0, 1.0) {}
 
 
 void SimMagnetometer::setTime(double time_sec) {
@@ -25,24 +27,26 @@ void SimMagnetometer::setTime(double time_sec) {
 }
 
 common::Vector3 SimMagnetometer::read() {
+    if (is_dead_) return common::Vector3::Zero();
+
+    // 1. Compute Earth field in Inertial frame
     common::Vector3 pos_eci = orbit_.getPosition();
-    common::Vector3 b_eci = computeDipoleField(pos_eci, sim_time_);
+    common::Vector3 B_eci = computeDipoleField(pos_eci, sim_time_);
 
-    // Rotate ECI vector to Body frame
-    // q_b_to_i * v_b = v_i => v_b = q_b_to_i.inverse() * v_i
-    common::Quaternion q_b_to_i = body_.getAttitude();
-    common::Vector3 b_body = q_b_to_i.inverse() * b_eci;
+    // 2. Transform to Body frame
+    common::Vector3 B_body = body_.getAttitude().conjugate() * B_eci;
 
-    // Add bias
-    b_body += config_.bias;
+    // 3. Add noise and bias, and scaling
+    common::Vector3 measured = B_body;
+    measured += config_.bias;
 
     if (config_.noise_std > 0.0) {
-        b_body.x() += dist_(gen_);
-        b_body.y() += dist_(gen_);
-        b_body.z() += dist_(gen_);
+        measured.x() += dist_(gen_) * config_.noise_std;
+        measured.y() += dist_(gen_) * config_.noise_std;
+        measured.z() += dist_(gen_) * config_.noise_std;
     }
 
-    return b_body;
+    return measured;
 }
 
 

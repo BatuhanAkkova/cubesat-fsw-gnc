@@ -19,7 +19,7 @@ using namespace fsw::core;
 using namespace fsw::gnc;
 
 /**
- * Phase 6 Full Mission Test
+ * Mission Test
  * 
  * Simulates complete mission scenario:
  * 1. Deploy from launch vehicle with HIGH tumble rate
@@ -29,7 +29,7 @@ using namespace fsw::gnc;
  * 5. Attitude controller slews to Sun pointing
  * 6. Verify final attitude and stability
  */
-class Phase6MissionTest : public ::testing::Test {
+class MissionTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // 1. Satellite Inertia (CubeSat-like)
@@ -115,7 +115,7 @@ protected:
     Vector3 sun_inertial;
 };
 
-TEST_F(Phase6MissionTest, FullMissionSimulation) {
+TEST_F(MissionTest, FullMissionSimulation) {
     const double dt = 0.1;  // 10Hz
     const double simulation_time = 120.0;  // 2 minutes
     const int total_steps = static_cast<int>(simulation_time / dt);
@@ -271,7 +271,7 @@ TEST_F(Phase6MissionTest, FullMissionSimulation) {
     std::cout << "\n=== MISSION SUCCESS ===" << std::endl;
 }
 
-TEST_F(Phase6MissionTest, SchedulerIntegration) {
+TEST_F(MissionTest, SchedulerIntegration) {
     // Test that scheduler can orchestrate the mission
     TaskScheduler scheduler(0.1, false);  // 10Hz, simulation mode
     

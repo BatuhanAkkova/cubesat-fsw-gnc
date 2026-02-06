@@ -47,12 +47,14 @@ target_link_libraries(hal_interfaces INTERFACE common)
 add_library(sim_engine STATIC
     src/sim/dynamics/RigidBody.cpp
     src/sim/dynamics/Orbit.cpp
+    src/sim/Simulation.cpp
 )
 
 target_sources(sim_engine PUBLIC
     src/sim/engine/Integrator.hpp
     src/sim/dynamics/RigidBody.hpp
     src/sim/dynamics/Orbit.hpp
+    src/sim/Simulation.hpp
 )
 target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_engine PUBLIC common)
@@ -108,14 +110,36 @@ target_link_libraries(fsw_fdir PUBLIC common)
 add_library(fsw_core STATIC
     src/fsw/core/ModeManager.cpp
     src/fsw/core/TaskScheduler.cpp
+    src/fsw/FlightSoftware.cpp
 )
 target_sources(fsw_core PUBLIC
     src/fsw/core/DataStore.hpp
     src/fsw/core/ModeManager.hpp
     src/fsw/core/TaskScheduler.hpp
+    src/fsw/FlightSoftware.hpp
 )
 target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(fsw_core PUBLIC common fsw_gnc fsw_fdir)
+
+# --- Optimization & Testing Tools ---
+add_library(optimization STATIC
+    src/opt/GeneticOptimizer.cpp
+)
+target_sources(optimization PUBLIC
+    src/opt/FitnessEvaluator.hpp
+    src/opt/GeneticOptimizer.hpp
+)
+target_include_directories(optimization PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(optimization PUBLIC fsw_core sim_models sim_engine common)
+
+add_library(mc_runner STATIC
+    src/test/MonteCarloRunner.cpp
+)
+target_sources(mc_runner PUBLIC
+    src/test/MonteCarloRunner.hpp
+)
+target_include_directories(mc_runner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(mc_runner PUBLIC fsw_core sim_models sim_engine common)
 
 # --- Tests ---
 enable_testing()

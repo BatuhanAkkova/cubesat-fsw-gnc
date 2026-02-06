@@ -19,17 +19,17 @@ common::VectorX RigidBody::dynamics(double, const common::VectorX& y,
     // Unpack state
     common::Vector4 q_coeffs = y.segment<4>(0);
     common::Quaternion q(q_coeffs(3), q_coeffs(0), q_coeffs(1), q_coeffs(2)); // w, x, y, z construction
-    q.normalize(); // Ensure unit quaternion (though integration might drift slightly, good to normalize)
+    q.normalize(); // Ensure unit quaternion
     
     common::Vector3 omega = y.segment<3>(4);
 
-    // 1. Attitude Kinematics: q_dot = 0.5 * q * omega_quat
+    // Attitude Kinematics: q_dot = 0.5 * q * omega_quat
     // Using Eigen multiplication:
     common::Quaternion omega_q(0, omega.x(), omega.y(), omega.z());
     common::Quaternion q_dot = q * omega_q;
     q_dot.coeffs() *= 0.5;
 
-    // 2. Attitude Dynamics: I * omega_dot + omega x (I * omega + H_int) = tau_ext + tau_int
+    // Attitude Dynamics: I * omega_dot + omega x (I * omega + H_int) = tau_ext + tau_int
     // omega_dot = I_inv * (tau_ext + tau_int - omega x (I * omega + H_int))
     common::Vector3 total_h = inertia_ * omega + internal_momentum;
     common::Vector3 w_cross_h = omega.cross(total_h);

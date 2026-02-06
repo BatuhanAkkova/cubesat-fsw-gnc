@@ -39,11 +39,17 @@ public:
      */
     void setTime(double time_sec);
 
+    void injectFailure_Dead() { is_dead_ = true; }
+    void setScalingFactor(double factor) { scaling_factor_ = factor; }
+
 private:
     const dynamics::RigidBody& body_;
     const dynamics::Orbit& orbit_;
     Config config_;
     double sim_time_;  // Simulation time [s]
+
+    bool is_dead_ = false;
+    double scaling_factor_ = 1.0;
 
     mutable std::mt19937 gen_;
     mutable std::normal_distribution<double> dist_;

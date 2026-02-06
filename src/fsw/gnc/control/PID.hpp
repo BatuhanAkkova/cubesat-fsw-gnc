@@ -66,6 +66,14 @@ public:
         first_run_ = true;
     }
 
+    void setGains(double kp, double ki, double kd) {
+        config_.kp = kp;
+        config_.ki = ki;
+        config_.kd = kd;
+    }
+
+    Config getConfig() const { return config_; }
+
 private:
     Config config_;
     double integral_;

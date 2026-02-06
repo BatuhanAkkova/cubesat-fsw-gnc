@@ -54,7 +54,7 @@ void WheelDesaturation::reset() {
 
 common::Vector3 WheelDesaturation::computeTotalMomentum(
         const std::vector<std::shared_ptr<hal::IRW>>& wheels) const {
-    // For simplicity, assume wheels are aligned with  body axes [X, Y, Z]
+    // For simplicity, assume wheels are aligned with body axes [X, Y, Z]
     common::Vector3 h_total = common::Vector3::Zero();
 
     if (wheels.size() >= 3) {

@@ -9,7 +9,7 @@ namespace common {
  * @brief Represents spacecraft elapsed time in seconds.
  * 
  * Uses double precision for simplicity in simulation and GNC math.
- * In a real flight computer, we might care more about rollover or tick counts.
+ * In a real flight computer, implement rollover or tick counts.
  */
 class SpacecraftTime {
 public:

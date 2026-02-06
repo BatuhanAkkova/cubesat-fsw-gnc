@@ -32,8 +32,6 @@ void MEKF::predict(const common::Vector3& gyro_meas, double dt, const common::Ma
     // Simple Euler integration
     q_est_.coeffs() += q_dot.coeffs() * dt;
     q_est_.normalize();
-
-    // Beta constant in prediction
     
     // 2. Propagate Covariance
     // F matrix (continuous time linearized dynamics)
@@ -108,9 +106,10 @@ void MEKF::update_quat(const common::Quaternion& q_meas, const common::Matrix3& 
     q_est_.normalize();
 
     // 5. Update Covariance
-    // P = (I - K*H) * P
+    // Joseph form: P = (I - KH) * P * (I - KH)' + K * R * K'
     common::MatrixX I6 = common::MatrixX::Identity(6, 6);
-    P_ = (I6 - K * H) * P_; // Note: Joseph form is more robust but this is standard
+    common::MatrixX IKH = I6 - K * H;
+    P_ = IKH * P_ * IKH.transpose() + K * R * K.transpose();
 }
 
 void MEKF::reset() {

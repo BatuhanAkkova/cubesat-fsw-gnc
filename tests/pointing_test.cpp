@@ -13,7 +13,7 @@
 
 using namespace common;
 
-class Phase5PointingTest : public ::testing::Test {
+class PointingTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // 1. Satellite Inertia
@@ -58,7 +58,7 @@ protected:
     std::unique_ptr<fsw::gnc::control::AttitudeController> controller;
 };
 
-TEST_F(Phase5PointingTest, SlewManeuver) {
+TEST_F(PointingTest, SlewManeuver) {
     double dt = 0.1;
     double simulation_time = 30.0; // seconds
     int steps = static_cast<int>(simulation_time / dt);
@@ -88,7 +88,7 @@ TEST_F(Phase5PointingTest, SlewManeuver) {
         internal_momentum.y() = wheels[1]->getAngularMomentum();
         internal_momentum.z() = wheels[2]->getAngularMomentum();
 
-        // Feed command to wheels for NEXT step
+        // Feed command to wheels for next step
         wheels[0]->setTorqueCommand(-torque_cmd.x());
         wheels[1]->setTorqueCommand(-torque_cmd.y());
         wheels[2]->setTorqueCommand(-torque_cmd.z());

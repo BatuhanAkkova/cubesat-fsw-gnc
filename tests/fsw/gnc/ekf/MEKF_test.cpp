@@ -90,7 +90,7 @@ TEST_F(MEKFTest, BiasEstimation) {
     
     // Run loop
     for (int i = 0; i < 500; ++i) {
-        // 1. Simulate Reality
+        // Simulate Reality
         // Static Spacecraft, Gyro reads Bias
         // True Omega = 0
         // Gyro Meas = True Omega + Bias + Noise = Bias
@@ -104,8 +104,6 @@ TEST_F(MEKFTest, BiasEstimation) {
     }
     
     // Filter should learn that the gyro reading is actually bias
-    // because attitude is not changing (measured by star tracker)
-    // so omega_est should -> 0
     // omega_est = gyro_meas - beta_est => beta_est should -> gyro_meas
     
     Vector3 final_bias = mekf.getBias();

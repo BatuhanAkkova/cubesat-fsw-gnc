@@ -39,28 +39,35 @@ double SimRW::step(double dt) {
     // Simple Euler integration for wheel speed
     // J * dw/dt = T_motor - T_friction
     // T_friction assumption: proportional to speed (viscous)
-    
+    if (is_dead_) {
+        commanded_torque_ = 0.0;
+        // For "dead" assume motor is disconnected and friction is minimal or handled below.
+    }
+
+    // Apply efficiency to the commanded torque
+    double actual_motor_torque = commanded_torque_ * efficiency_;
+
+    // J_w * dw/dt = tau_motor - tau_friction
     double friction_torque = config_.friction_coeff * current_speed_;
-    double net_torque_on_wheel = commanded_torque_ - friction_torque;
+    double net_torque = actual_motor_torque - friction_torque;
 
     // Check momentum saturation (speed limit)
     // If at max speed and trying to accelerate further, clamp torque
     double current_momentum = std::abs(getAngularMomentum());
     if (current_momentum >= config_.max_momentum) {
         // If speed is + and torque is +, clamp
-        if (current_speed_ > 0 && net_torque_on_wheel > 0) {
-            net_torque_on_wheel = 0; 
+        if (current_speed_ > 0 && net_torque > 0) {
+            net_torque = 0; 
         }
-        // If speed is - and torque is -, clamp
-        else if (current_speed_ < 0 && net_torque_on_wheel < 0) {
-            net_torque_on_wheel = 0;
+        else if (current_speed_ < 0 && net_torque < 0) {
+            net_torque = 0;
         }
     }
 
-    double angular_accel = net_torque_on_wheel / config_.inertia;
+    double angular_accel = net_torque / config_.inertia;
     current_speed_ += angular_accel * dt;
     
-    return -net_torque_on_wheel; 
+    return -net_torque; 
 }
 
 } // namespace sim

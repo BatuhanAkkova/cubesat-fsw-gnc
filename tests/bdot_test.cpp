@@ -6,7 +6,7 @@
 
 using namespace common;
 
-class Phase3BdotTest : public ::testing::Test {
+class BdotTest : public ::testing::Test {
 protected:
     void SetUp() override {
         // Inertia matrix (arbitrary diagonal)
@@ -35,7 +35,7 @@ protected:
     const Vector3 B_inertial = {0.0, 50000e-9, 0.0}; // 50 uT in Y
 };
 
-TEST_F(Phase3BdotTest, DetumbleSimulation) {
+TEST_F(BdotTest, DetumbleSimulation) {
     double dt = 0.1;
     double simulation_time = 60.0; // seconds
     int steps = static_cast<int>(simulation_time / dt);

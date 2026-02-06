@@ -111,7 +111,9 @@ public:
         }
         
         // Apply gain adjustment to PID controllers
-        updatePIDGains(scheduled_config);
+        pid_roll_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
+        pid_pitch_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
+        pid_yaw_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
 
         // 5. Compute PID torques
         double tx = pid_roll_.calculate(error_vec.x(), dt);
@@ -138,6 +140,27 @@ public:
         last_torque_cmd_ = common::Vector3::Zero();
     }
 
+    /**
+     * @brief Set PID gains for all axes.
+     * For simplicity, set the same gains for all three axes.
+     */
+    void setGains(double kp, double ki, double kd, bool is_nominal = true) {
+        if (is_nominal) {
+            config_.nominal_pid.kp = kp;
+            config_.nominal_pid.ki = ki;
+            config_.nominal_pid.kd = kd;
+            pid_roll_.setGains(kp, ki, kd);
+            pid_pitch_.setGains(kp, ki, kd);
+            pid_yaw_.setGains(kp, ki, kd);
+        } else {
+            config_.large_error_pid.kp = kp;
+            config_.large_error_pid.ki = ki;
+            config_.large_error_pid.kd = kd;
+        }
+    }
+
+    Config& getConfig() { return config_; }
+
 private:
     /**
      * @brief Compute gain scheduling factor based on error magnitude.
@@ -153,18 +176,6 @@ private:
             double range = config_.large_error_threshold - config_.small_error_threshold;
             return 1.0 - (error_angle - config_.small_error_threshold) / range;
         }
-    }
-
-    /**
-     * @brief Update PID controller gains (modifies internal PID configs)
-     */
-    void updatePIDGains(const PID::Config& new_config) {
-        // Note: This is a hack since PID doesn't expose gain setters
-        // In production, PID class should have setGains() method
-        // For now, we rely on PID using config reference
-        pid_roll_ = PID(new_config);
-        pid_pitch_ = PID(new_config);
-        pid_yaw_ = PID(new_config);
     }
 
     /**

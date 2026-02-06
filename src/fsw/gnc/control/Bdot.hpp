@@ -16,7 +16,6 @@ public:
     /**
      * @brief Constructor
      * @param gain Controller gain [Am^2 * s / T] typically. 
-     *             Or simply a positive scalar if normalized.
      */
     explicit Bdot(double gain);
 

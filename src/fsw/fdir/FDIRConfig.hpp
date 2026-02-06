@@ -45,8 +45,6 @@ struct StarTrackerHealthConfig {
     int stuck_sample_count = 30;          // samples - slower update rate typically
     
     // Range detection parameters
-    // Quaternions are always normalized, so no explicit range check needed
-    // But we can check if quaternion norm deviates from 1.0
     double quat_norm_tolerance = 0.01;    // dimensionless - acceptable deviation from unit norm
     
     // Rapid change detection parameters
