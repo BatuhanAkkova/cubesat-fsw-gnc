@@ -42,10 +42,13 @@ void ModeManager::evaluateTransitions(const common::Vector3& angular_velocity) {
             break;
             
         case MissionMode::NOMINAL:
+        case MissionMode::SCIENCE:
+        case MissionMode::DOWNLINK:
+        case MissionMode::DEGRADED:
             // Return to SAFE if rates are too high
             if (rate_norm > config_.nominal_to_safe_rate_threshold) {
                 target_mode = MissionMode::SAFE;
-                common::LogWarning("High angular rates detected ({:.4f} rad/s), transitioning to SAFE", 
+                common::LogWarning("High angular rates detected ({:.4f} rad/s), transitioning to SAFE fallback", 
                                    rate_norm);
             }
             break;
@@ -123,6 +126,8 @@ std::string ModeManager::getModeString(MissionMode mode) {
     switch (mode) {
         case MissionMode::SAFE:       return "SAFE";
         case MissionMode::NOMINAL:    return "NOMINAL";
+        case MissionMode::SCIENCE:    return "SCIENCE";
+        case MissionMode::DOWNLINK:   return "DOWNLINK";
         case MissionMode::DEGRADED:   return "DEGRADED";
         case MissionMode::CONTINGENCY: return "CONTINGENCY";
         default:                      return "UNKNOWN";

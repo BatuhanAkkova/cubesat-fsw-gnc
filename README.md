@@ -26,12 +26,15 @@ This repository contains a complete FSW stack including attitude determination, 
     -   **Command Handling**: Robust command parsing and execution (e.g., "Slew to Nadir", "Set PID Gains").
     -   **Ground Station Simulation**: Simulated ground segment for commanding and telemetry monitoring.
 -   **Optimization**: Genetic algorithms for automatic controller gain tuning and Monte Carlo robustness analysis.
+-   **Mission**: 
+    -   **Full Mission**: Timeline simulation (Deployment -> Detumble ->Science -> Downlink).
+    -   **Performance**: Measure actual overhead in full mission simulation.
 
 ## Project Structure
 
 ```text
 ├── src/
-│   ├── common/         # Common math types, time, and logging utilities
+│   ├── common/         # Common math types, time, profiler and logging utilities
 │   ├── fsw/            # Flight Software core
 │   │   ├── core/       # DataStore, ModeManager, TaskScheduler, Command Handling
 │   │   ├── gnc/        # MEKF, PID, B-Dot, Pointing Strategies
@@ -71,18 +74,9 @@ ctest -C Release --output-on-failure
 
 The following phases are planned for upcoming development cycles:
 
-### Mission Operations & Ground Segment
--   [ ]**Mission Scripting**: Full mission timeline simulation (Deployment -> Science -> Downlink).
--   [ ]**Performance profiling**: Measure actual overhead in full mission simulation.
-
 ### Simulation and Visualization in Python
 -   [ ]Implement a Python-based simulation environment for rapid prototyping.
 -   [ ]Create 3D visualizations for attitude and orbit verification.
-
-### Example Simulations
--   [ ]**Detumble Simulation**: Verify B-Dot performance from high tip-off rates.
--   [ ]**Pointing Simulation**: Verify PID/LQG slew performance and settling time.
--   [ ]**Full Mission Simulation**: End-to-end verification (Deploy -> Detumble -> Pointing).
 
 ### Virtual HIL
 -   [ ]**Virtual Bus Interface**: Implement a virtual I2C/SPI interface.

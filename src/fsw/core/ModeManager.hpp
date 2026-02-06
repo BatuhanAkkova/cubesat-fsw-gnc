@@ -16,6 +16,8 @@ namespace core {
 enum class MissionMode {
     SAFE,        // B-Dot detumbling mode
     NOMINAL,     // Normal pointing/control mode
+    SCIENCE,     // Payload operations / Target pointing
+    DOWNLINK,    // Ground station communication
     DEGRADED,    // Operation with reduced sensor confidence
     CONTINGENCY  // Emergency fallback (future use)
 };
