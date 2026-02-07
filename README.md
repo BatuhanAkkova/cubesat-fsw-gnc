@@ -74,17 +74,51 @@ ctest -C Release --output-on-failure
 
 The following phases are planned for upcoming development cycles:
 
-### Simulation and Visualization in Python
--   [ ]Implement a Python-based simulation environment for rapid prototyping.
--   [ ]Create 3D visualizations for attitude and orbit verification.
+### Simulation and Visualization in Python ✅ **COMPLETED**
+-   [x] Implemented Python-based visualization tools for attitude analysis.
+-   [x] Created 3D visualizations for attitude verification.
+-   [ ] Create 3D orbit visualization and integrated dashboard.
+
+See [Python Visualization Guide](#python-visualization) below for usage.
 
 ### Virtual HIL
--   [ ]**Virtual Bus Interface**: Implement a virtual I2C/SPI interface.
--   [ ]**Virtual Sensors**: Implement a virtual sensor interface with quantization.
--   [ ]**Virtual Driver**: Implement a driver for FSW, virtual MPU6050.
+-   [ ] **Virtual Bus Interface**: Implement a virtual I2C/SPI interface.
+-   [ ] **Virtual Sensors**: Implement a virtual sensor interface with quantization.
+-   [ ] **Virtual Driver**: Implement a driver for FSW, virtual MPU6050.
 
 *Developed for advanced CubeSat mission modeling and flight software development.*
 ---
+
+## Python Visualization
+
+The project includes Python tools for visualizing simulation data exported from C++ tests.
+
+### Quick Start
+
+1. **Run C++ simulation and export data:**
+   ```powershell
+   cd build
+   .\tests\Release\mission_test.exe --gtest_filter=MissionTest.FullMissionSimulation
+   ```
+
+2. **Install Python dependencies:**
+   ```powershell
+   python -m pip install -r python/requirements.txt
+   ```
+
+3. **Visualize mission data:**
+   ```powershell
+   python python/examples/demo.py
+   ```
+
+### Features
+
+- **3D Attitude Visualization**: Interactive 3D plots showing spacecraft body frame orientation
+- **Time-Series Analysis**: Quaternion, Euler angle, and angular rate plots
+- **Mission Mode Tracking**: Visual indication of SAFE, NOMINAL, SCIENCE, and DOWNLINK phases
+- **Animation Support**: Create GIF/MP4 animations of attitude evolution
+
+See `python/` directory for full documentation and examples.
 
 ## License
 

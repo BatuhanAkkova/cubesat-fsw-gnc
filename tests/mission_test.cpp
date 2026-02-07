@@ -8,6 +8,7 @@
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
 #include "common/Profiler.hpp"
+#include "common/DataLogger.hpp"
 #include <iostream>
 #include <iomanip>
 
@@ -146,6 +147,20 @@ TEST_F(MissionTest, FullMissionSimulation) {
     std::cout << "\n=== FULL MISSION TIMELINE SIMULATION ===" << std::endl;
     std::cout << std::fixed << std::setprecision(4);
     
+    // Setup data logger
+    common::DataLogger logger("mission_data.csv");
+    logger.addColumn("time");
+    logger.addColumn("qw");
+    logger.addColumn("qx");
+    logger.addColumn("qy");
+    logger.addColumn("qz");
+    logger.addColumn("wx");
+    logger.addColumn("wy");
+    logger.addColumn("wz");
+    logger.addColumn("mode");
+    logger.writeHeader();
+    std::cout << "Data logging to: mission_data.csv" << std::endl;
+    
     // Initial state
     Vector3 w_initial = body->getAngularVelocity();
     std::cout << "Initial angular velocity: [" << w_initial.transpose() 
@@ -278,6 +293,22 @@ TEST_F(MissionTest, FullMissionSimulation) {
         
         {
             common::ScopedTimer t_dyn(profiler, "DynamicsStep");
+            
+            // Log data every step (or skip for performance: step % 10 == 0)
+            if (step % 5 == 0) {  // Log every 0.5 seconds
+                logger.startRow();
+                logger.addValue(t);
+                logger.addValue(q_curr.w());
+                logger.addValue(q_curr.x());
+                logger.addValue(q_curr.y());
+                logger.addValue(q_curr.z());
+                logger.addValue(w_curr.x());
+                logger.addValue(w_curr.y());
+                logger.addValue(w_curr.z());
+                logger.addValue(static_cast<int>(current_mode));
+                logger.endRow();
+            }
+            
             // Propagate dynamics
             body->step(dt, external_torque, internal_torque, internal_momentum);
         }
