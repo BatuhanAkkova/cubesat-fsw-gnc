@@ -2,6 +2,7 @@
 #include "fsw/core/ModeManager.hpp"
 #include "fsw/core/TaskScheduler.hpp"
 #include "sim/dynamics/RigidBody.hpp"
+#include "sim/dynamics/Orbit.hpp"
 #include "sim/models/SimRW.hpp"
 #include "sim/models/SimTorquer.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
@@ -112,10 +113,27 @@ protected:
         q_sun_target = guidance::PointingStrategies::alignAxis(z_body, sun_inertial);
         q_target_sci = guidance::PointingStrategies::alignAxis(z_body, target_inertial);
         q_gs_target = guidance::PointingStrategies::alignAxis(z_body, gs_inertial);
+        
+        // 11. Setup Orbit (LEO at 400km altitude)
+        constexpr double MU_EARTH = 3.986004418e14;
+        constexpr double R_EARTH = 6378137.0;
+        double altitude = 400000.0;  // 400 km
+        double r = R_EARTH + altitude;
+        double v_circ = std::sqrt(MU_EARTH / r);
+        double inclination = 51.6 * (M_PI / 180.0);  // ISS-like orbit
+        
+        Vector3 orbit_pos(r, 0, 0);
+        Vector3 orbit_vel(0, v_circ * std::cos(inclination), v_circ * std::sin(inclination));
+        
+        sim::dynamics::Orbit::Config orbit_config;
+        orbit_config.enable_j2 = true;
+        
+        orbit = std::make_unique<sim::dynamics::Orbit>(orbit_pos, orbit_vel, orbit_config);
     }
 
     // Simulation components
     std::unique_ptr<sim::dynamics::RigidBody> body;
+    std::unique_ptr<sim::dynamics::Orbit> orbit;
     std::vector<std::unique_ptr<sim::SimRW>> wheels;
     std::unique_ptr<sim::models::SimTorquer> torquer;
     
@@ -141,14 +159,15 @@ protected:
 
 TEST_F(MissionTest, FullMissionSimulation) {
     const double dt = 0.1;  // 10Hz
-    const double simulation_time = 1500.0;  // Ample time for full timeline
+    const double simulation_time = 3600.0;  // 1 hour mission for complete orbit coverage
     const int total_steps = static_cast<int>(simulation_time / dt);
 
     std::cout << "\n=== FULL MISSION TIMELINE SIMULATION ===" << std::endl;
     std::cout << std::fixed << std::setprecision(4);
     
-    // Setup data logger
+    // Setup data logger with comprehensive telemetry
     common::DataLogger logger("mission_data.csv");
+    // Basic state
     logger.addColumn("time");
     logger.addColumn("qw");
     logger.addColumn("qx");
@@ -157,7 +176,34 @@ TEST_F(MissionTest, FullMissionSimulation) {
     logger.addColumn("wx");
     logger.addColumn("wy");
     logger.addColumn("wz");
+    logger.addColumn("rx");
+    logger.addColumn("ry");
+    logger.addColumn("rz");
+    logger.addColumn("vx");
+    logger.addColumn("vy");
+    logger.addColumn("vz");
     logger.addColumn("mode");
+    
+    // GNC Control Data
+    logger.addColumn("torque_cmd_x");
+    logger.addColumn("torque_cmd_y");
+    logger.addColumn("torque_cmd_z");
+    logger.addColumn("torque_ext_x");
+    logger.addColumn("torque_ext_y");
+    logger.addColumn("torque_ext_z");
+    logger.addColumn("qw_target");
+    logger.addColumn("qx_target");
+    logger.addColumn("qy_target");
+    logger.addColumn("qz_target");
+    logger.addColumn("pointing_error");
+    logger.addColumn("momentum_x");
+    logger.addColumn("momentum_y");
+    logger.addColumn("momentum_z");
+    
+    // Mission Progress
+    logger.addColumn("data_collected");
+    logger.addColumn("data_downlinked");
+    
     logger.writeHeader();
     std::cout << "Data logging to: mission_data.csv" << std::endl;
     
@@ -243,6 +289,9 @@ TEST_F(MissionTest, FullMissionSimulation) {
         Vector3 external_torque = Vector3::Zero();
         Vector3 internal_torque = Vector3::Zero();
         Vector3 internal_momentum = Vector3::Zero();
+        Vector3 torque_cmd = Vector3::Zero();
+        Quaternion q_target = q_curr;  // Default to current attitude
+        double pointing_error = 0.0;
  
         // Update B_inertial with multi-axis rotation to ensure all axes are dampened
         double orbit_rate = 0.05; // Fast rotation for quick test
@@ -264,9 +313,12 @@ TEST_F(MissionTest, FullMissionSimulation) {
                 Vector3 dipole_cmd = bdot_controller->update(B_body, dt);
                 torquer->setDipole(dipole_cmd);
                 external_torque = torquer->getDipole().cross(B_body);
+                
+                // In SAFE mode, target is current attitude (detumble only)
+                q_target = q_curr;
+                pointing_error = 0.0;
             } else {
                 // Reaction wheel based control for all other modes
-                Quaternion q_target;
                 if (current_mode == MissionMode::NOMINAL) {
                     q_target = q_sun_target;
                 } else if (current_mode == MissionMode::SCIENCE) {
@@ -277,7 +329,8 @@ TEST_F(MissionTest, FullMissionSimulation) {
                     q_target = q_curr; // Hold current
                 }
                 
-                Vector3 torque_cmd = attitude_controller->computeTorque(q_curr, q_target, w_curr, dt);
+                torque_cmd = attitude_controller->computeTorque(q_curr, q_target, w_curr, dt);
+                pointing_error = q_curr.angularDistance(q_target) * 180.0 / M_PI;
                 
                 // Apply to reaction wheels
                 wheels[0]->setTorqueCommand(-torque_cmd.x());
@@ -296,7 +349,11 @@ TEST_F(MissionTest, FullMissionSimulation) {
             
             // Log data every step (or skip for performance: step % 10 == 0)
             if (step % 5 == 0) {  // Log every 0.5 seconds
+                Vector3 pos = orbit->getPosition();
+                Vector3 vel = orbit->getVelocity();
+                
                 logger.startRow();
+                // Basic state
                 logger.addValue(t);
                 logger.addValue(q_curr.w());
                 logger.addValue(q_curr.x());
@@ -305,12 +362,40 @@ TEST_F(MissionTest, FullMissionSimulation) {
                 logger.addValue(w_curr.x());
                 logger.addValue(w_curr.y());
                 logger.addValue(w_curr.z());
+                logger.addValue(pos.x());
+                logger.addValue(pos.y());
+                logger.addValue(pos.z());
+                logger.addValue(vel.x());
+                logger.addValue(vel.y());
+                logger.addValue(vel.z());
                 logger.addValue(static_cast<int>(current_mode));
+                
+                // GNC Control Data
+                logger.addValue(torque_cmd.x());
+                logger.addValue(torque_cmd.y());
+                logger.addValue(torque_cmd.z());
+                logger.addValue(external_torque.x());
+                logger.addValue(external_torque.y());
+                logger.addValue(external_torque.z());
+                logger.addValue(q_target.w());
+                logger.addValue(q_target.x());
+                logger.addValue(q_target.y());
+                logger.addValue(q_target.z());
+                logger.addValue(pointing_error);
+                logger.addValue(internal_momentum.x());
+                logger.addValue(internal_momentum.y());
+                logger.addValue(internal_momentum.z());
+                
+                // Mission Progress
+                logger.addValue(data_collected);
+                logger.addValue(data_downlinked);
+                
                 logger.endRow();
             }
             
             // Propagate dynamics
             body->step(dt, external_torque, internal_torque, internal_momentum);
+            orbit->step(dt);
         }
         
         // Periodic status updates
