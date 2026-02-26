@@ -15,7 +15,8 @@ The visualization system provides comprehensive analysis of the full mission tim
 ### 1. Install Dependencies
 
 ```powershell
-cd c:\Users\batuh\OneDrive\Desktop\cubesat-fsw-gnc
+# Navigate to the project root directory
+cd path/to/cubesat-fsw-gnc
 python -m pip install -r python/requirements.txt
 ```
 
@@ -32,7 +33,8 @@ This generates `mission_data.csv` with comprehensive telemetry (~30 columns).
 
 ```powershell
 # From project root
-cd c:\Users\batuh\OneDrive\Desktop\cubesat-fsw-gnc
+# Navigate to the project root directory
+cd path/to/cubesat-fsw-gnc
 
 # Create interactive dashboard
 python python/visualize_mission.py build/mission_data.csv
@@ -175,7 +177,8 @@ plt.show()
 ### "FileNotFoundError: Data file not found"
 **Solution:** Always run from project root and use relative paths:
 ```powershell
-cd c:\Users\batuh\OneDrive\Desktop\cubesat-fsw-gnc
+# Navigate to the project root directory
+cd path/to/cubesat-fsw-gnc
 python python/visualize_mission.py build/mission_data.csv
 ```
 

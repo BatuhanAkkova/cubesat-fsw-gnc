@@ -1,0 +1,57 @@
+name: C++ CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_test:
+    name: ${{ matrix.os }} - ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Debug, Release]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{ matrix.build_type }}
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C ${{ matrix.build_type }} --output-on-failure
+
+    - name: Upload Binaries (Windows)
+      if: matrix.os == 'windows-latest' && matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-windows
+        path: ${{github.workspace}}/build/tests/Release/*.exe
+
+    - name: Upload Binaries (Linux/macOS)
+      if: (matrix.os == 'ubuntu-latest' || matrix.os == 'macos-latest') && matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: binaries-${{ matrix.os }}
+        path: ${{github.workspace}}/build/tests/Release/*
+        
+    - name: Upload Test Data
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: mission-data-${{ matrix.os }}
+        path: ${{github.workspace}}/build/mission_data.csv
+        if-no-files-found: ignore

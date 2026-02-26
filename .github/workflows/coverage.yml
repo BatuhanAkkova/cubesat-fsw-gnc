@@ -1,0 +1,51 @@
+name: Coverage
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Install gcovr
+      run: pip install gcovr
+
+    - name: Configure CMake
+      run: >
+        cmake -B ${{github.workspace}}/build
+        -DCMAKE_BUILD_TYPE=Debug
+        -DENABLE_COVERAGE=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config Debug
+
+    - name: Test
+      working-directory: ${{github.workspace}}/build
+      run: ctest -C Debug --output-on-failure
+
+    - name: Generate Coverage Report
+      working-directory: ${{github.workspace}}/build
+      run: |
+        gcovr -r ${{github.workspace}} --html --html-details -o coverage.html
+        gcovr -r ${{github.workspace}} --xml -o coverage.xml
+
+    - name: Upload HTML Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report-html
+        path: ${{github.workspace}}/build/coverage*.html
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v5
+      with:
+        files: ${{github.workspace}}/build/coverage.xml
+        fail_ci_if_error: true
