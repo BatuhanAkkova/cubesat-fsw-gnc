@@ -55,6 +55,11 @@ add_library(sim_engine STATIC
     src/sim/dynamics/Orbit.cpp
     src/sim/Simulation.cpp
     src/sim/GroundStation.cpp
+    src/sim/models/SimGyro.cpp
+    src/sim/models/SimMagnetometer.cpp
+    src/sim/models/SimTorquer.cpp
+    src/sim/models/SimStarTracker.cpp
+    src/sim/models/SimRW.cpp
 )
 
 target_sources(sim_engine PUBLIC
@@ -63,27 +68,14 @@ target_sources(sim_engine PUBLIC
     src/sim/dynamics/Orbit.hpp
     src/sim/Simulation.hpp
     src/sim/GroundStation.hpp
-)
-target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(sim_engine PUBLIC common)
-
-# --- Sim Models ---
-add_library(sim_models STATIC
-    src/sim/models/SimGyro.cpp
-    src/sim/models/SimMagnetometer.cpp
-    src/sim/models/SimTorquer.cpp
-    src/sim/models/SimStarTracker.cpp
-    src/sim/models/SimRW.cpp
-)
-target_sources(sim_models PUBLIC
     src/sim/models/SimGyro.hpp
     src/sim/models/SimMagnetometer.hpp
     src/sim/models/SimTorquer.hpp
     src/sim/models/SimStarTracker.hpp
     src/sim/models/SimRW.hpp
 )
-target_include_directories(sim_models PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(sim_models PUBLIC hal_interfaces sim_engine common)
+target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(sim_engine PUBLIC common hal_interfaces)
 
 # --- FSW GNC ---
 add_library(fsw_gnc STATIC
@@ -147,7 +139,7 @@ target_sources(optimization PUBLIC
     src/opt/GeneticOptimizer.hpp
 )
 target_include_directories(optimization PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(optimization PUBLIC fsw_core sim_engine sim_models common)
+target_link_libraries(optimization PUBLIC fsw_core sim_engine common)
 
 add_library(mc_runner STATIC
     src/test/MonteCarloRunner.cpp
@@ -156,7 +148,7 @@ target_sources(mc_runner PUBLIC
     src/test/MonteCarloRunner.hpp
 )
 target_include_directories(mc_runner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(mc_runner PUBLIC fsw_core sim_engine sim_models common)
+target_link_libraries(mc_runner PUBLIC fsw_core sim_engine common)
 
 # --- Tests ---
 enable_testing()

@@ -1,8 +1,10 @@
 include(FetchContent)
 
+# Suppress Eigen testing and documentation
 set(EIGEN_BUILD_TESTING OFF CACHE BOOL "Disable Eigen testing" FORCE)
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "Disable Eigen docs" FORCE)
-set(BUILD_TESTING OFF) # Temporarily disable global testing for Eigen
+set(BUILD_TESTING OFF)
+
 FetchContent_Declare(
   Eigen
   GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
@@ -10,4 +12,3 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(Eigen)
-set(BUILD_TESTING ON) # Re-enable for our project

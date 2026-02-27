@@ -12,7 +12,7 @@ gtest_discover_tests(test_datastore)
 
 # B-Dot Test
 add_executable(bdot_test bdot_test.cpp)
-target_link_libraries(bdot_test PRIVATE sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(bdot_test PRIVATE sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(bdot_test)
 
 # MEKF Test
@@ -22,12 +22,12 @@ gtest_discover_tests(mekf_test)
 
 # Pointing Test
 add_executable(pointing_test pointing_test.cpp)
-target_link_libraries(pointing_test PRIVATE sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(pointing_test PRIVATE sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(pointing_test)
 
 # Mode Manager Test
 add_executable(mode_manager_test mode_manager_test.cpp)
-target_link_libraries(mode_manager_test PRIVATE fsw_core sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(mode_manager_test PRIVATE fsw_core sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(mode_manager_test)
 
 # Task Scheduler Test
@@ -37,7 +37,7 @@ gtest_discover_tests(task_scheduler_test)
 
 # Mission Test
 add_executable(mission_test mission_test.cpp)
-target_link_libraries(mission_test PRIVATE fsw_core sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(mission_test PRIVATE fsw_core sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(mission_test)
 
 # Orbit J2 Test
@@ -47,12 +47,12 @@ gtest_discover_tests(orbit_j2_test)
 
 # Integration Test
 add_executable(integration_test integration_test.cpp)
-target_link_libraries(integration_test PRIVATE sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(integration_test PRIVATE sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(integration_test)
 
 # Wheel Desaturation Demo
 add_executable(wheel_desaturation_demo wheel_desaturation_demo.cpp)
-target_link_libraries(wheel_desaturation_demo PRIVATE sim_engine sim_models fsw_gnc common)
+target_link_libraries(wheel_desaturation_demo PRIVATE sim_engine fsw_gnc common)
 
 # LQG Controller Tests
 add_executable(lqg_controller_test fsw/lqg_controller_test.cpp)
@@ -60,7 +60,7 @@ target_link_libraries(lqg_controller_test PRIVATE fsw_gnc common gtest_main)
 gtest_discover_tests(lqg_controller_test)
 
 add_executable(lqg_performance_demo fsw/lqg_performance_demo.cpp)
-target_link_libraries(lqg_performance_demo PRIVATE sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(lqg_performance_demo PRIVATE sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(lqg_performance_demo)
 
 # FDIR Tests
@@ -69,12 +69,12 @@ target_link_libraries(sensor_health_test PRIVATE fsw_fdir common gtest_main)
 gtest_discover_tests(sensor_health_test)
 
 add_executable(fdir_integration_test fdir/fdir_integration_test.cpp)
-target_link_libraries(fdir_integration_test PRIVATE fsw_fdir fsw_core sim_engine sim_models fsw_gnc common gtest_main)
+target_link_libraries(fdir_integration_test PRIVATE fsw_fdir fsw_core sim_engine fsw_gnc common gtest_main)
 gtest_discover_tests(fdir_integration_test)
 
 # Controller Gain Test
 add_executable(controller_gain_test controller_gain_test.cpp)
-target_link_libraries(controller_gain_test PRIVATE optimization mc_runner fsw_gnc sim_engine sim_models common gtest_main)
+target_link_libraries(controller_gain_test PRIVATE optimization mc_runner fsw_gnc sim_engine common gtest_main)
 gtest_discover_tests(controller_gain_test)
 
 # Telemetry Test
@@ -89,7 +89,7 @@ gtest_discover_tests(command_parser_test)
 
 # Command Integration Test
 add_executable(command_integration_test command_integration_test.cpp)
-target_link_libraries(command_integration_test PRIVATE fsw_core sim_engine sim_models common gtest_main)
+target_link_libraries(command_integration_test PRIVATE fsw_core sim_engine common gtest_main)
 gtest_discover_tests(command_integration_test)
 
 # Ground Station Test
