@@ -9,15 +9,19 @@ namespace models {
 /**
  * @brief Simulated Gyroscope
  */
-class SimGyro : public hal::IGyro {
-public:
     /**
      * @brief Configuration for gyroscope model
      */
-    struct Config {
-        double noise_std = 0.0;  // Standard deviation of noise [rad/s]
-        common::Vector3 bias = common::Vector3::Zero(); // Constant bias [rad/s]
+    struct SimGyroConfig {
+        double noise_std;  // Standard deviation of noise [rad/s]
+        common::Vector3 bias; // Constant bias [rad/s]
+        
+        SimGyroConfig() : noise_std(0.0), bias(common::Vector3::Zero()) {}
     };
+
+class SimGyro : public hal::IGyro {
+public:
+    using Config = SimGyroConfig;
 
     explicit SimGyro(const dynamics::RigidBody& body, const Config& config = Config());
 

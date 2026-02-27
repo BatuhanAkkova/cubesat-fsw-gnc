@@ -5,6 +5,17 @@
 namespace sim {
 
 /**
+ * @brief Configuration for reaction wheel model.
+ */
+struct SimRWConfig {
+    double inertia;         // kg*m^2
+    double max_torque;      // Nm
+    double max_momentum;    // Nms (implies max speed = max_momentum / inertia)
+    double friction_coeff;  // Nms/rad (viscous friction) - optional
+    double initial_speed;   // rad/s
+};
+
+/**
  * @brief Simulated Reaction Wheel model.
  * 
  * Models first-order dynamics of a reaction wheel:
@@ -12,13 +23,7 @@ namespace sim {
  */
 class SimRW : public hal::IRW {
 public:
-    struct Config {
-        double inertia;         // kg*m^2
-        double max_torque;      // Nm
-        double max_momentum;    // Nms (implies max speed = max_momentum / inertia)
-        double friction_coeff;  // Nms/rad (viscous friction) - optional
-        double initial_speed;   // rad/s
-    };
+    using Config = SimRWConfig;
 
     SimRW(const Config& config);
 

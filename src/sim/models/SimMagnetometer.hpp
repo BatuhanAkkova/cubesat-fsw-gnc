@@ -10,17 +10,22 @@ namespace models {
 /**
  * @brief Simulated Magnetometer
  */
-class SimMagnetometer : public hal::IMagnetometer {
-public:
     /**
      * @brief Configuration for magnetic field model
      */
-    struct Config {
-        bool enable_earth_rotation = true;  // Enable time-varying field due to Earth rotation
-        bool use_tilted_dipole = false;     // Use tilted dipole (11 deg offset)
-        double noise_std = 0.0;             // Standard deviation of noise [Tesla]
-        common::Vector3 bias = common::Vector3::Zero(); // Hard-iron bias [Tesla]
+    struct SimMagnetometerConfig {
+        bool enable_earth_rotation;  // Enable time-varying field due to Earth rotation
+        bool use_tilted_dipole;     // Use tilted dipole (11 deg offset)
+        double noise_std;             // Standard deviation of noise [Tesla]
+        common::Vector3 bias; // Hard-iron bias [Tesla]
+
+        SimMagnetometerConfig() : enable_earth_rotation(true), use_tilted_dipole(false), 
+                  noise_std(0.0), bias(common::Vector3::Zero()) {}
     };
+
+class SimMagnetometer : public hal::IMagnetometer {
+public:
+    using Config = SimMagnetometerConfig;
 
     /**
      * @brief Constructor

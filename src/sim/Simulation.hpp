@@ -14,23 +14,28 @@
 namespace sim {
 
 /**
+ * @brief Configuration for simulation
+ */
+struct SimulationConfig {
+    common::Matrix3 inertia = common::Matrix3::Identity() * 0.01;
+    common::Quaternion init_q = common::Quaternion::Identity();
+    common::Vector3 init_w = common::Vector3::Zero();
+    
+    common::Vector3 init_pos = common::Vector3(7000000, 0, 0); // ~600km LEO
+    common::Vector3 init_vel = common::Vector3(0, 7500, 0);
+    
+    dynamics::Orbit::Config orbit_cfg;
+    models::SimGyro::Config gyro_cfg;
+    models::SimMagnetometer::Config mag_cfg;
+};
+
+/**
  * @brief Simulation wrapper to simplify running environmental simulations.
  * Manages dynamics, orbit, and sensors.
  */
 class Simulation {
 public:
-    struct Config {
-        common::Matrix3 inertia = common::Matrix3::Identity() * 0.01;
-        common::Quaternion init_q = common::Quaternion::Identity();
-        common::Vector3 init_w = common::Vector3::Zero();
-        
-        common::Vector3 init_pos = common::Vector3(7000000, 0, 0); // ~600km LEO
-        common::Vector3 init_vel = common::Vector3(0, 7500, 0);
-        
-        dynamics::Orbit::Config orbit_cfg;
-        models::SimGyro::Config gyro_cfg;
-        models::SimMagnetometer::Config mag_cfg;
-    };
+    using Config = SimulationConfig;
 
     Simulation(const Config& config);
 

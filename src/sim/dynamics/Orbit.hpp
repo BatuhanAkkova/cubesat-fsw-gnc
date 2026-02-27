@@ -4,15 +4,18 @@
 namespace sim {
 namespace dynamics {
 
-class Orbit {
-public:
     /**
      * @brief Configuration for orbit propagator
      */
-    struct Config {
+    struct OrbitConfig {
         bool enable_j2;  // Enable J2 oblateness perturbation
-        Config() : enable_j2(true) {}
+        OrbitConfig() : enable_j2(true) {}
     };
+
+class Orbit {
+public:
+    using Config = OrbitConfig;
+
     /**
      * @brief Constructor
      * @param init_pos Initial position [m] in ECI

@@ -24,11 +24,18 @@ public:
      * @brief Configuration parameters
      */
     struct Config {
-        double momentum_threshold_ratio = 0.8;  // Trigger at 80% of max momentum
-        double desat_gain = 1e-6;               // Control gain for B-cross-H [A*m^2/(Nms * T)]
-        double max_desat_duration = 300.0;      // Maximum time in desaturation [s]
-        double min_time_between_desat = 60.0;   // Minimum cooldown period [s]
-        double min_b_field_magnitude = 1e-6;    // Minimum B-field to attempt desaturation [T]
+        double momentum_threshold_ratio;  // Trigger at 80% of max momentum
+        double desat_gain;               // Control gain for B-cross-H [A*m^2/(Nms * T)]
+        double max_desat_duration;      // Maximum time in desaturation [s]
+        double min_time_between_desat;   // Minimum cooldown period [s]
+        double min_b_field_magnitude;    // Minimum B-field to attempt desaturation [T]
+
+        Config() 
+            : momentum_threshold_ratio(0.8),
+              desat_gain(1e-6),
+              max_desat_duration(300.0),
+              min_time_between_desat(60.0),
+              min_b_field_magnitude(1e-6) {}
     };
 
     /**
