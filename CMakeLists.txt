@@ -77,46 +77,31 @@ target_sources(sim_engine PUBLIC
 target_include_directories(sim_engine PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
 target_link_libraries(sim_engine PUBLIC common hal_interfaces)
 
-# --- FSW GNC ---
-add_library(fsw_gnc STATIC
+# --- Flight Software (Merged) ---
+add_library(fsw_lib STATIC
     src/fsw/gnc/control/Bdot.cpp
     src/fsw/gnc/ekf/MEKF.cpp
     src/fsw/gnc/control/WheelDesaturation.cpp
-)
-target_sources(fsw_gnc PUBLIC
-    src/fsw/gnc/control/Bdot.hpp
-    src/fsw/gnc/ekf/MEKF.hpp
-    src/fsw/gnc/control/PID.hpp
-    src/fsw/gnc/control/AttitudeController.hpp
-    src/fsw/gnc/control/WheelDesaturation.hpp
-    src/fsw/gnc/guidance/PointingStrategies.hpp
-)
-target_include_directories(fsw_gnc PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(fsw_gnc PUBLIC common)
-
-# --- FSW FDIR ---
-add_library(fsw_fdir STATIC
     src/fsw/fdir/FDIRManager.cpp
     src/fsw/telemetry/TelemetryService.cpp
     src/fsw/telemetry/TelemetryManager.cpp
-)
-target_sources(fsw_fdir PUBLIC
-    src/fsw/fdir/FDIRConfig.hpp
-    src/fsw/fdir/SensorHealthMonitor.hpp
-    src/fsw/fdir/FDIRManager.hpp
-)
-target_include_directories(fsw_fdir PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(fsw_fdir PUBLIC common)
-
-# --- FSW Core ---
-add_library(fsw_core STATIC
     src/fsw/core/ModeManager.cpp
     src/fsw/core/TaskScheduler.cpp
     src/fsw/core/CommandManager.cpp
     src/fsw/core/CommandParser.cpp
     src/fsw/FlightSoftware.cpp
 )
-target_sources(fsw_core PUBLIC
+
+target_sources(fsw_lib PUBLIC
+    src/fsw/gnc/control/Bdot.hpp
+    src/fsw/gnc/ekf/MEKF.hpp
+    src/fsw/gnc/control/PID.hpp
+    src/fsw/gnc/control/AttitudeController.hpp
+    src/fsw/gnc/control/WheelDesaturation.hpp
+    src/fsw/gnc/guidance/PointingStrategies.hpp
+    src/fsw/fdir/FDIRConfig.hpp
+    src/fsw/fdir/SensorHealthMonitor.hpp
+    src/fsw/fdir/FDIRManager.hpp
     src/fsw/core/DataStore.hpp
     src/fsw/core/ModeManager.hpp
     src/fsw/core/TaskScheduler.hpp
@@ -127,8 +112,9 @@ target_sources(fsw_core PUBLIC
     src/fsw/telemetry/CommandProtocol.hpp
     src/fsw/FlightSoftware.hpp
 )
-target_include_directories(fsw_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(fsw_core PUBLIC common fsw_gnc fsw_fdir)
+
+target_include_directories(fsw_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
+target_link_libraries(fsw_lib PUBLIC common)
 
 # --- Optimization & Testing Tools ---
 add_library(optimization STATIC
@@ -139,7 +125,7 @@ target_sources(optimization PUBLIC
     src/opt/GeneticOptimizer.hpp
 )
 target_include_directories(optimization PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(optimization PUBLIC fsw_core sim_engine common)
+target_link_libraries(optimization PUBLIC fsw_lib sim_engine common)
 
 add_library(mc_runner STATIC
     src/test/MonteCarloRunner.cpp
@@ -148,7 +134,7 @@ target_sources(mc_runner PUBLIC
     src/test/MonteCarloRunner.hpp
 )
 target_include_directories(mc_runner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(mc_runner PUBLIC fsw_core sim_engine common)
+target_link_libraries(mc_runner PUBLIC fsw_lib sim_engine common)
 
 # --- Tests ---
 enable_testing()
