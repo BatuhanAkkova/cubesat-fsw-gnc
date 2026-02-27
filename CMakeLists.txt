@@ -147,7 +147,7 @@ target_sources(optimization PUBLIC
     src/opt/GeneticOptimizer.hpp
 )
 target_include_directories(optimization PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(optimization PUBLIC fsw_core sim_models sim_engine common)
+target_link_libraries(optimization PUBLIC fsw_core sim_engine sim_models common)
 
 add_library(mc_runner STATIC
     src/test/MonteCarloRunner.cpp
@@ -156,7 +156,7 @@ target_sources(mc_runner PUBLIC
     src/test/MonteCarloRunner.hpp
 )
 target_include_directories(mc_runner PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(mc_runner PUBLIC fsw_core sim_models sim_engine common)
+target_link_libraries(mc_runner PUBLIC fsw_core sim_engine sim_models common)
 
 # --- Tests ---
 enable_testing()

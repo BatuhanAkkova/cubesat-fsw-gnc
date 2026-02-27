@@ -74,7 +74,7 @@ gtest_discover_tests(fdir_integration_test)
 
 # Controller Gain Test
 add_executable(controller_gain_test controller_gain_test.cpp)
-target_link_libraries(controller_gain_test PRIVATE optimization mc_runner fsw_gnc common gtest_main)
+target_link_libraries(controller_gain_test PRIVATE optimization mc_runner fsw_gnc sim_engine sim_models common gtest_main)
 gtest_discover_tests(controller_gain_test)
 
 # Telemetry Test
