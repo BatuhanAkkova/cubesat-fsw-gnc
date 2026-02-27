@@ -53,7 +53,8 @@ public:
 
         for (double t = 0; t < duration; t += dt) {
             fsw::SensorData sensors = sim.getSensors();
-            common::Vector3 torque = fsw.step(sensors, dt);
+            std::vector<std::vector<uint8_t>> empty_cmds;
+            common::Vector3 torque = fsw.step(sensors, empty_cmds, dt);
             sim.step(dt, torque);
 
             // Calculate current pointing error (angle to Sun)

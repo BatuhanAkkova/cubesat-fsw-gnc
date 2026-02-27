@@ -4,15 +4,15 @@
 namespace sim {
 namespace dynamics {
 
+class Orbit {
+public:
     /**
      * @brief Configuration for orbit propagator
      */
     struct Config {
-        bool enable_j2 = true;  // Enable J2 oblateness perturbation
+        bool enable_j2;  // Enable J2 oblateness perturbation
+        Config() : enable_j2(true) {}
     };
-
-class Orbit {
-public:
     /**
      * @brief Constructor
      * @param init_pos Initial position [m] in ECI
@@ -58,7 +58,6 @@ public:
     double getArgumentOfPerigee() const;
 
 private:
-    // State: [rx, ry, rz, vx, vy, vz] (6 elements)
     common::VectorX state_;
     Config config_;
 

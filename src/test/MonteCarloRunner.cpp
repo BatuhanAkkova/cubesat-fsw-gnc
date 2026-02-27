@@ -67,7 +67,8 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
     double dt = config_.dt;
     for (double t = 0; t < config_.duration; t += dt) {
         fsw::SensorData sensors = sim.getSensors();
-        common::Vector3 torque = fsw.step(sensors, dt);
+        std::vector<std::vector<uint8_t>> empty_cmds;
+        common::Vector3 torque = fsw.step(sensors, empty_cmds, dt);
         sim.step(dt, torque);
 
         // Track stats
