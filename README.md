@@ -132,8 +132,6 @@ cd build
 
 ```powershell
 # From project root
-cd c:\Users\batuh\OneDrive\Desktop\cubesat-fsw-gnc
-
 # Install Python dependencies (first time only)
 python -m pip install -r python/requirements.txt
 
