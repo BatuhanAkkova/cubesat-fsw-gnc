@@ -39,9 +39,20 @@ public:
         // Start in Nominal mode to test pointing immediately
         fsw_cfg.mode_cfg.safe_to_nominal_rate_threshold = 1.0; 
         
+        // Setup JSON config for factory to use
+        fsw_cfg.full_config = {
+            {"fsw", {
+                {"controllers", {
+                    {"attitude", {
+                        {"type", "PID"},
+                        {"nominal_pid", {{"kp", gains[0]}, {"ki", gains[1]}, {"kd", gains[2]}}}
+                    }}
+                }}
+            }}
+        };
+        
+        fsw_cfg.sun_inertial = common::Vector3(1, 0, 0); // Point at X axis
         fsw::FlightSoftware fsw(fsw_cfg);
-        fsw.getAttitudeController().setGains(gains[0], gains[1], gains[2], true);
-        fsw.setTargetSunInertial(common::Vector3(1, 0, 0)); // Point at X axis
 
         // 3. Run Simulation
         double dt = 0.1;
@@ -52,7 +63,7 @@ public:
         bool stable = true;
 
         for (double t = 0; t < duration; t += dt) {
-            fsw::SensorData sensors = sim.getSensors();
+            common::SensorData sensors = sim.getSensors();
             std::vector<std::vector<uint8_t>> empty_cmds;
             common::Vector3 torque = fsw.step(sensors, empty_cmds, dt);
             sim.step(dt, torque);

@@ -18,6 +18,7 @@ public:
 
     // From ITorquer
     void setDipole(const common::Vector3& dipole_moment_Am2) override;
+    void stop() override { current_dipole_ = common::Vector3::Zero(); }
 
     /**
      * @brief Get the actual dipole moment produced by the torquer (includes saturation).

@@ -9,7 +9,23 @@ namespace ekf {
 MEKF::MEKF() {
     q_est_.setIdentity();
     beta_est_.setZero();
+    w_est_.setZero();
     P_.setIdentity(6, 6);
+}
+
+void MEKF::update(const common::SensorData& sensors, double dt) {
+    // 1. Prediction step with Gyro
+    // Use conservative nominal Q (can be made configurable later)
+    common::Matrix6 Q = common::Matrix6::Identity() * 1e-7; 
+    predict(sensors.gyro_body, dt, Q);
+
+    // 2. Correction step with Star Tracker (if valid)
+    // Assume Star Tracker provides q_measured
+    common::Matrix3 R = common::Matrix3::Identity() * 1e-4;
+    update_quat(sensors.q_measured, R);
+
+    // 3. Update net angular velocity estimate
+    w_est_ = sensors.gyro_body - beta_est_;
 }
 
 void MEKF::initialize(const common::Quaternion& q0, const common::Vector3& beta0, const common::MatrixX& P0) {

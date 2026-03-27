@@ -48,7 +48,7 @@ public:
     /**
      * @brief Get sensor readings for FSW.
      */
-    fsw::SensorData getSensors() const;
+    common::SensorData getSensors() const;
 
     // Truth accessors
     common::Quaternion getAttitude() const { return body_->getAttitude(); }

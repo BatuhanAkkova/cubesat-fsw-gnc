@@ -52,6 +52,15 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
 
     // 2. Setup FSW
     fsw::FlightSoftware::Config fsw_cfg;
+    fsw_cfg.full_config = {
+        {"fsw", {
+            {"controllers", {
+                {"attitude", {{"type", "PID"}, {"nominal_pid", {{"kp", 0.8}, {"ki", 0.05}, {"kd", 1.2}}}}},
+                {"detumble", {{"type", "Bdot"}, {"gain", 50000.0}}}
+            }},
+            {"estimator", {{"type", "MEKF"}}}
+        }}
+    };
     fsw::FlightSoftware fsw(fsw_cfg);
 
     // 3. Inject random failures
@@ -66,7 +75,7 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
     
     double dt = config_.dt;
     for (double t = 0; t < config_.duration; t += dt) {
-        fsw::SensorData sensors = sim.getSensors();
+        common::SensorData sensors = sim.getSensors();
         std::vector<std::vector<uint8_t>> empty_cmds;
         common::Vector3 torque = fsw.step(sensors, empty_cmds, dt);
         sim.step(dt, torque);

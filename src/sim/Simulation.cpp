@@ -24,8 +24,8 @@ void Simulation::step(double dt, const common::Vector3& torque_cmd) {
     body_->step(dt, torque_cmd);
 }
 
-fsw::SensorData Simulation::getSensors() const {
-    fsw::SensorData sensors;
+common::SensorData Simulation::getSensors() const {
+    common::SensorData sensors;
     sensors.mag_body = mag_->read();
     sensors.gyro_body = gyro_->read();
     sensors.q_measured = st_->getOrientation();

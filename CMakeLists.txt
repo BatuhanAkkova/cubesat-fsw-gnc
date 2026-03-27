@@ -18,6 +18,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(GetEigen)
 include(GetSpdlog)
 include(GetGTest)
+include(GetNlohmannJson)
 
 # Core Library
 add_library(core_lib INTERFACE)
@@ -27,6 +28,7 @@ target_include_directories(core_lib INTERFACE
 target_link_libraries(core_lib INTERFACE
     Eigen3::Eigen
     spdlog::spdlog
+    nlohmann_json::nlohmann_json
 )
 
 # --- Common ---
@@ -99,6 +101,7 @@ target_sources(fsw_lib PUBLIC
     src/fsw/gnc/control/AttitudeController.hpp
     src/fsw/gnc/control/WheelDesaturation.hpp
     src/fsw/gnc/guidance/PointingStrategies.hpp
+    src/fsw/gnc/GNCComponentFactory.hpp
     src/fsw/fdir/FDIRConfig.hpp
     src/fsw/fdir/SensorHealthMonitor.hpp
     src/fsw/fdir/FDIRManager.hpp
@@ -114,7 +117,11 @@ target_sources(fsw_lib PUBLIC
 )
 
 target_include_directories(fsw_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/src)
-target_link_libraries(fsw_lib PUBLIC common)
+target_link_libraries(fsw_lib PUBLIC common core_lib)
+
+if(MSVC)
+    target_compile_definitions(fsw_lib PRIVATE _SILENCE_ALL_MS_EXT_DEPRECATION_WARNINGS)
+endif()
 
 # --- Optimization & Testing Tools ---
 add_library(optimization STATIC
@@ -139,3 +146,7 @@ target_link_libraries(mc_runner PUBLIC fsw_lib sim_engine common)
 # --- Tests ---
 enable_testing()
 add_subdirectory(tests)
+
+# --- Executables ---
+add_executable(sim_config_run src/main_config.cpp)
+target_link_libraries(sim_config_run PRIVATE fsw_lib sim_engine core_lib)

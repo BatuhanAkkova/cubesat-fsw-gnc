@@ -33,6 +33,7 @@ public:
     double getAngularMomentum() const override;
     double getMaxTorque() const override;
     double getMaxMomentum() const override;
+    void stop() override { commanded_torque_ = 0.0; }
 
     // Simulation Interface
     /**
