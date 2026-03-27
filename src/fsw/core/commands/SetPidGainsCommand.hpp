@@ -3,24 +3,17 @@
 #include "common/logger.hpp"
 #include "fsw/core/Command.hpp"
 #include "fsw/core/DataStore.hpp"
+#include "fsw/gnc/control/AttitudeController.hpp"
 
 namespace fsw {
 namespace core {
 namespace commands {
 
 /**
- * @brief Payload for updating PID gains.
- */
-struct GainsPayload {
-    double kp;
-    double ki;
-    double kd;
-    bool is_nominal;
-};
-
-/**
  * @brief Command to update PID gains in the AttitudeController.
  */
+using fsw::gnc::control::GainsPayload;
+
 class SetPidGainsCommand : public Command {
    public:
     SetPidGainsCommand(double kp, double ki, double kd, bool is_nominal)

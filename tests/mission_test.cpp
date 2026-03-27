@@ -304,6 +304,7 @@ TEST_F(MissionTest, FullMissionSimulation) {
                 // Get magnetic field in body frame
                 // B-Dot control
                 common::SensorData sensors;
+                common::Vector3 B_body = q_curr.inverse() * B_curr_inertial;
                 sensors.mag_body = B_body;
 
                 common::State state_est;
@@ -489,6 +490,7 @@ TEST_F(MissionTest, SchedulerIntegration) {
                 Vector3 B_curr_inertial(50000e-9 * std::cos(orbit_rate * t_total),
                                         50000e-9 * std::sin(orbit_rate * t_total), 0.0);
 
+                common::Vector3 B_body = q_curr.inverse() * B_curr_inertial;
                 common::SensorData sensors;
                 sensors.mag_body = B_body;
 

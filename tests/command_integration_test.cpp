@@ -19,11 +19,10 @@ TEST(CommandIntegrationTest, SlewToNadirCommandChangesGuidance) {
     fsw::DataStore::Instance().Reset();
     FlightSoftware::Config config;
     // Minimal config for testing
-    config.bdot_gain = 500.0;
 
     FlightSoftware fsw(config);
 
-    SensorData sensors;
+    common::SensorData sensors;
     sensors.gyro_body = common::Vector3::Zero();
     sensors.mag_body = common::Vector3(0, 5e-5, 0);
     sensors.q_measured = common::Quaternion::Identity();
@@ -73,13 +72,13 @@ TEST(CommandIntegrationTest, SetPidGainsCommandUpdatesController) {
     encodeDoubleBE(packet, 23, kd);
     packet[31] = 1;  // is_nominal
 
-    fsw.step(SensorData(), {packet}, 0.1);
+    fsw.step(common::SensorData(), {packet}, 0.1);
 
     // Verify gains updated
     auto& controller = fsw.getAttitudeController();
-    EXPECT_DOUBLE_EQ(controller.getConfig().nominal_pid.kp, 50.0);
-    EXPECT_DOUBLE_EQ(controller.getConfig().nominal_pid.ki, 0.5);
-    EXPECT_DOUBLE_EQ(controller.getConfig().nominal_pid.kd, 10.0);
+    EXPECT_DOUBLE_EQ(static_cast<double>(controller.getConfig().nominal_pid.kp), 50.0);
+    EXPECT_DOUBLE_EQ(static_cast<double>(controller.getConfig().nominal_pid.ki), 0.5);
+    EXPECT_DOUBLE_EQ(static_cast<double>(controller.getConfig().nominal_pid.kd), 10.0);
 }
 
 TEST(CommandIntegrationTest, SlewToTargetCommandUpdatesGuidance) {
@@ -88,7 +87,7 @@ TEST(CommandIntegrationTest, SlewToTargetCommandUpdatesGuidance) {
     FlightSoftware fsw(config);
 
     // Transition to NOMINAL
-    SensorData sensors;
+    common::SensorData sensors;
     sensors.gyro_body.setZero();
     for (int i = 0; i < 100; ++i) fsw.step(sensors, {}, 0.1);
 

@@ -10,6 +10,7 @@
 #include "fsw/core/ModeManager.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
+#include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
 
 namespace fsw {
@@ -38,6 +39,9 @@ class FlightSoftware {
     }
     core::MissionMode getCurrentMode() const {
         return mode_manager_->getCurrentMode();
+    }
+    gnc::control::AttitudeController& getAttitudeController() {
+        return *static_cast<gnc::control::AttitudeController*>(attitude_controller_.get());
     }
 
    private:

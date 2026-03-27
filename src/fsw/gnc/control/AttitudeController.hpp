@@ -3,12 +3,23 @@
 #include <cmath>
 
 #include "common/types.hpp"
+#include "fsw/core/DataStore.hpp"
 #include "fsw/gnc/control/PID.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 
 namespace fsw {
 namespace gnc {
 namespace control {
+ 
+/**
+ * @brief Payload for updating PID gains via DataStore.
+ */
+struct GainsPayload {
+    double kp;
+    double ki;
+    double kd;
+    bool is_nominal;
+};
 
 /**
  * @brief 3-Axis Attitude Controller with gain scheduling and rate limiting.
@@ -53,7 +64,14 @@ class AttitudeController : public interfaces::IController {
           pid_roll_(config.nominal_pid),
           pid_pitch_(config.nominal_pid),
           pid_yaw_(config.nominal_pid),
-          last_torque_cmd_(common::Vector3::Zero()) {}
+          last_torque_cmd_(common::Vector3::Zero()) {
+        
+        // Subscribe to gain updates
+        fsw::DataStore::Instance().subscribe<GainsPayload>("gnc/att_gains", 
+            [this](const GainsPayload& p) {
+                this->setGains(p.kp, p.ki, p.kd, p.is_nominal);
+            });
+    }
 
     /**
      * @brief Update control torque with gain scheduling and rate limiting.
