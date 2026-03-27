@@ -48,11 +48,20 @@ TEST_F(BdotTest, DetumbleSimulation) {
 
     for (int i = 0; i < steps; ++i) {
         // 1. Get Environment
-        Quaternion q_bi = body->getAttitude();
-        Vector3 B_body = q_bi.conjugate() * B_inertial;
-
         // 2. Control
-        Vector3 dipole_cmd = bdot->update(B_body, dt);
+        Quaternion q_bi = body->getAttitude();
+        Vector3 B_body = q_bi.inverse() * B_inertial;
+        
+        common::SensorData sensors;
+        sensors.mag_body = B_body;
+        
+        common::State state;
+        state.q = q_bi;
+        state.w = body->getAngularVelocity();
+        
+        common::GuidanceTarget target;
+        
+        Vector3 dipole_cmd = bdot->update(sensors, state, target, dt);
 
         // 3. Actuate
         torquer->setDipole(dipole_cmd);

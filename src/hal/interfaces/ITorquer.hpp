@@ -1,14 +1,17 @@
 #pragma once
 #include "common/types.hpp"
+#include "hal/interfaces/IActuator.hpp"
 
 namespace hal {
 
 /**
  * @brief Interface for a Magnetorquer actuator.
  */
-class ITorquer {
+class ITorquer : public IActuator {
 public:
     virtual ~ITorquer() = default;
+
+    std::string getName() const override { return "Torquer"; }
 
     /**
      * @brief Command a magnetic dipole moment.

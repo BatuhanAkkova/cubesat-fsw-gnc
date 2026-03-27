@@ -1,5 +1,6 @@
 #pragma once
 #include "common/types.hpp"
+#include "fsw/gnc/interfaces/IController.hpp"
 
 namespace fsw {
 namespace gnc {
@@ -11,7 +12,7 @@ namespace control {
  * Implements the B-Dot control law: M = -K * B_dot
  * Use to detumble the spacecraft.
  */
-class Bdot {
+class Bdot : public interfaces::IController {
 public:
     /**
      * @brief Constructor
@@ -21,16 +22,21 @@ public:
 
     /**
      * @brief Calculate control dipole moment
-     * @param b_body_T Magnetic field measurement in Body frame [Tesla]
-     * @param dt Time step since last update [seconds]
+     * @param sensors Latest sensor measurements.
+     * @param state Latest estimated state.
+     * @param target Guidance target.
+     * @param dt Time step [seconds]
      * @return Commanded dipole moment [Am^2] in Body frame
      */
-    common::Vector3 update(const common::Vector3& b_body_T, double dt);
+    common::Vector3 update(const common::SensorData& sensors,
+                          const common::State& state_curr,
+                          const common::GuidanceTarget& target,
+                          double dt) override;
 
     /**
      * @brief Reset the controller state (e.g. previous measurement)
      */
-    void reset();
+    void reset() override;
 
 private:
     double gain_;

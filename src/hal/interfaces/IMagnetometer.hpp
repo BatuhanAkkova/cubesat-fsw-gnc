@@ -1,14 +1,17 @@
 #pragma once
 #include "common/types.hpp"
+#include "hal/interfaces/ISensor.hpp"
 
 namespace hal {
 
 /**
  * @brief Interface for a Magnetometer sensor.
  */
-class IMagnetometer {
+class IMagnetometer : public ISensor {
 public:
     virtual ~IMagnetometer() = default;
+
+    std::string getName() const override { return "Magnetometer"; }
 
     /**
      * @brief Read the current magnetic field vector.

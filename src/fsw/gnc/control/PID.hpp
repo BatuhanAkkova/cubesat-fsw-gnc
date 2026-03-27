@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include "fsw/gnc/interfaces/IController.hpp"
 
 namespace fsw {
 namespace gnc {

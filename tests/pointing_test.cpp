@@ -70,10 +70,19 @@ TEST_F(PointingTest, SlewManeuver) {
 
     for (int i = 0; i < steps; ++i) {
         // 1. FSW: Get Attitude & Compute Control
-        Quaternion q_curr = body->getAttitude();
-        Vector3 w_curr = body->getAngularVelocity();
-        
-        Vector3 torque_cmd = controller->computeTorque(q_curr, q_target, w_curr, dt);
+        common::SensorData sensors;
+        sensors.q_measured = body->getAttitude();
+        sensors.gyro_body = body->getAngularVelocity();
+
+        common::State state_est;
+        state_est.q = sensors.q_measured;
+        state_est.w = sensors.gyro_body;
+
+        common::GuidanceTarget target;
+        target.q = q_target;
+        target.w = common::Vector3::Zero();
+
+        Vector3 torque_cmd = controller->update(sensors, state_est, target, dt);
 
         // 2. SIM: Apply torque to wheels and get feedback
         Vector3 internal_torque = Vector3::Zero();
@@ -97,7 +106,7 @@ TEST_F(PointingTest, SlewManeuver) {
         body->step(dt, Vector3::Zero(), internal_torque, internal_momentum);
 
         if (i % 50 == 0) {
-            double err_norm = (q_curr.inverse() * q_target).vec().norm();
+            double err_norm = (sensors.q_measured.inverse() * q_target).vec().norm();
             std::cout << "Time: " << i*dt << " | Att Err: " << err_norm << std::endl;
         }
     }

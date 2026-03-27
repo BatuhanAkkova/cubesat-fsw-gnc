@@ -2,6 +2,7 @@
 
 #include "common/types.hpp"
 #include "fsw/gnc/control/PID.hpp"
+#include "fsw/gnc/interfaces/IController.hpp"
 #include <cmath>
 
 namespace fsw {
@@ -18,7 +19,7 @@ namespace control {
  * Proper quaternion error (no small-angle approximation)
  * Direct rate feedback for better damping
  */
-class AttitudeController {
+class AttitudeController : public interfaces::IController {
 public:
     struct Config {
         // Nominal PID gains (for small errors < 10 deg)
@@ -54,22 +55,22 @@ public:
           last_torque_cmd_(common::Vector3::Zero()) {}
 
     /**
-     * @brief Compute control torque with gain scheduling and rate limiting.
+     * @brief Update control torque with gain scheduling and rate limiting.
      * 
-     * @param q_curr Current attitude (Body to Inertial)
-     * @param q_target Target attitude (Body to Inertial)
-     * @param omega_curr Current angular velocity in Body frame [rad/s]
+     * @param sensors Latest sensor measurements.
+     * @param state Latest estimated state.
+     * @param target Guidance target.
      * @param dt Time step [seconds]
      * @return common::Vector3 Commanded torque in Body frame [Nm]
      */
-    common::Vector3 computeTorque(const common::Quaternion& q_curr,
-                                  const common::Quaternion& q_target,
-                                  const common::Vector3& omega_curr,
-                                  double dt) {
+    common::Vector3 update(const common::SensorData& sensors,
+                          const common::State& state_curr,
+                          const common::GuidanceTarget& target,
+                          double dt) override {
         
         // 1. Calculate Attitude Error (Quaternion)
         // q_err = q_curr_inv * q_target (Error from current to target in Body frame)
-        common::Quaternion q_err = q_curr.inverse() * q_target;
+        common::Quaternion q_err = state_curr.q.inverse() * target.q;
         
         // Ensure q_err is the "shortest path"
         if (q_err.w() < 0) {
@@ -80,14 +81,10 @@ public:
         double error_angle = 2.0 * std::acos(std::min(1.0, std::abs(q_err.w())));
         
         // 3. Extract error axis-angle representation
-        // q_err = [cos(θ/2), sin(θ/2) * axis]
-        // error_vec = θ * axis
         common::Vector3 error_vec;
         if (error_angle < 1e-6) {
-            // Near zero error, use small-angle approximation
             error_vec = 2.0 * q_err.vec();
         } else {
-            // Full quaternion error
             double sin_half = std::sin(error_angle / 2.0);
             if (std::abs(sin_half) > 1e-9) {
                 error_vec = (error_angle / sin_half) * q_err.vec();
@@ -98,19 +95,15 @@ public:
 
         // 4. Apply gain scheduling
         double gain_factor = computeGainFactor(error_angle);
-        
-        // Adjust PID gains based on error magnitude
         PID::Config scheduled_config = config_.nominal_pid;
         if (gain_factor < 1.0) {
-            // Interpolate between nominal and large-error gains
-            double alpha = gain_factor;  // 0 = large error, 1 = small error
+            double alpha = gain_factor;
             scheduled_config.kp = alpha * config_.nominal_pid.kp + 
                                  (1.0 - alpha) * config_.large_error_pid.kp;
             scheduled_config.kd = alpha * config_.nominal_pid.kd + 
                                  (1.0 - alpha) * config_.large_error_pid.kd;
         }
         
-        // Apply gain adjustment to PID controllers
         pid_roll_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
         pid_pitch_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
         pid_yaw_.setGains(scheduled_config.kp, scheduled_config.ki, scheduled_config.kd);
@@ -123,17 +116,18 @@ public:
         common::Vector3 torque_pid(tx, ty, tz);
 
         // 6. Add direct rate feedback for better damping
-        common::Vector3 torque_damping = -config_.rate_feedback_gain * omega_curr;
+        // Note: target.w is the target rates, state_curr.w is current estimated rate
+        common::Vector3 torque_damping = -config_.rate_feedback_gain * (state_curr.w - target.w);
         
         common::Vector3 torque_cmd = torque_pid + torque_damping;
 
-        // 7. Apply rate limiting to prevent rapid changes
+        // 7. Apply rate limiting
         torque_cmd = applyRateLimiting(torque_cmd, dt);
 
         return torque_cmd;
     }
 
-    void reset() {
+    void reset() override {
         pid_roll_.reset();
         pid_pitch_.reset();
         pid_yaw_.reset();

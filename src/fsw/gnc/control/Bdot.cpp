@@ -7,7 +7,12 @@ namespace control {
 Bdot::Bdot(double gain)
     : gain_(gain), b_prev_(common::Vector3::Zero()), first_run_(true) {}
 
-common::Vector3 Bdot::update(const common::Vector3& b_body_T, double dt) {
+common::Vector3 Bdot::update(const common::SensorData& sensors,
+                          const common::State& state_curr,
+                          const common::GuidanceTarget& target,
+                          double dt) {
+    const common::Vector3& b_body_T = sensors.mag_body;
+    
     if (first_run_) {
         b_prev_ = b_body_T;
         first_run_ = false;
@@ -15,7 +20,6 @@ common::Vector3 Bdot::update(const common::Vector3& b_body_T, double dt) {
     }
 
     if (dt <= 1e-6) {
-        // Avoid division by zero
         return common::Vector3::Zero();
     }
 

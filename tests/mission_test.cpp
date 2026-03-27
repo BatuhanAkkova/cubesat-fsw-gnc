@@ -307,10 +307,18 @@ TEST_F(MissionTest, FullMissionSimulation) {
                 // === SAFE MODE: B-Dot Detumbling ===
                 
                 // Get magnetic field in body frame
-                Vector3 B_body = q_curr.conjugate() * B_curr_inertial;
-                
                 // B-Dot control
-                Vector3 dipole_cmd = bdot_controller->update(B_body, dt);
+                common::SensorData sensors;
+                sensors.mag_body = B_body;
+                
+                common::State state_est;
+                state_est.q = q_curr;
+                state_est.w = w_curr;
+                
+                common::GuidanceTarget target;
+                target.mode = "SAFE";
+
+                Vector3 dipole_cmd = bdot_controller->update(sensors, state_est, target, dt);
                 torquer->setDipole(dipole_cmd);
                 external_torque = torquer->getDipole().cross(B_body);
                 
@@ -328,8 +336,21 @@ TEST_F(MissionTest, FullMissionSimulation) {
                 } else {
                     q_target = q_curr; // Hold current
                 }
-                
-                torque_cmd = attitude_controller->computeTorque(q_curr, q_target, w_curr, dt);
+
+                common::SensorData sensors;
+                sensors.q_measured = q_curr;
+                sensors.gyro_body = w_curr;
+
+                common::State state_est;
+                state_est.q = q_curr;
+                state_est.w = w_curr;
+
+                common::GuidanceTarget target;
+                target.q = q_target;
+                target.w = Vector3::Zero(); 
+                target.mode = ModeManager::getModeString(current_mode);
+
+                torque_cmd = attitude_controller->update(sensors, state_est, target, dt);
                 pointing_error = q_curr.angularDistance(q_target) * 180.0 / M_PI;
                 
                 // Apply to reaction wheels
@@ -471,8 +492,17 @@ TEST_F(MissionTest, SchedulerIntegration) {
                 0.0
             );
 
-            Vector3 B_body = q_curr.conjugate() * B_curr_inertial;
-            Vector3 dipole_cmd = bdot_controller->update(B_body, dt);
+            common::SensorData sensors;
+            sensors.mag_body = B_body;
+            
+            common::State state_est;
+            state_est.q = q_curr;
+            state_est.w = w_curr;
+            
+            common::GuidanceTarget target;
+            target.mode = "SAFE";
+
+            Vector3 dipole_cmd = bdot_controller->update(sensors, state_est, target, dt);
             torquer->setDipole(dipole_cmd);
             external_torque = torquer->getDipole().cross(B_body);
         }

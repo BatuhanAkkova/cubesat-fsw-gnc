@@ -1,5 +1,5 @@
-#pragma once
-
+#include "common/types.hpp"
+#include "hal/interfaces/IActuator.hpp"
 #include <string>
 
 namespace hal {
@@ -9,9 +9,11 @@ namespace hal {
  * 
  * Provides methods to command torque and read speed/momentum.
  */
-class IRW {
+class IRW : public IActuator {
 public:
     virtual ~IRW() = default;
+
+    std::string getName() const override { return "ReactionWheel"; }
 
     /**
      * @brief Set the torque command for the wheel.
