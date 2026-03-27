@@ -2,7 +2,32 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A high-performance C++ Flight Software (FSW) and GNC simulation framework for CubeSats. This project implements a modular architecture with comprehensive visualization capabilities, designed for transitioning from pure software simulation to hardware-in-the-loop (HIL) readiness.
+**Modular CubeSat Flight Software and GNC Framework for Autonomous Spacecraft Operations**
+
+A high-performance C++ Flight Software (FSW) and GNC simulation framework for CubeSats. Designed for transitioning from pure software simulation to hardware-in-the-loop (HIL) readiness.
+
+## Detailed Documentation
+
+For in-depth explanations of the system's logic and algorithms, refer to:
+
+-   [**Architecture Overview**](docs/architecture.md): Modular design, task scheduling, and state management.
+-   [**Attitude Estimation (MEKF)**](docs/estimation.md): Multiplicative EKF implementation and noise modeling.
+-   [**Attitude Control**](docs/control.md): B-dot detumbling and 3-axis PID pointing laws.
+-   [**FDIR System**](docs/fdir.md): Fault Detection, Isolation, and Recovery strategies.
+
+## System Architecture
+
+```mermaid
+graph TD
+    Sensors -->|Raw Data| SE[State Estimation]
+    SE -->|Estimated State| Guidance
+    Guidance -->|Targets| Control
+    Control -->|Commands| Dynamics
+    SE -.->|Health Status| FDIR[FDIR System]
+    FDIR -->|Recovery Actions| MM[Mode Manager / Flight Executive]
+    MM -->|Telem Packets| Ground[Telemetry & Ground Interface]
+```
+
 
 ## Mission Showcase
 
@@ -36,11 +61,11 @@ The simulation propagates a realistic **Low Earth Orbit (LEO)** trajectory:
 
 ### 4. Autonomous Mission Timeline
 ![Mission Timeline](docs/mission_timeline.png)
-The **Mode Manager** autonomously drives the mission state machine:
-1. **SAFE Mode** (Red): Detumble and checkout
-2. **NOMINAL Mode** (Cyan): Power positive, charge batteries
-3. **SCIENCE Mode** (Blue): Perform payload operations (maximize data collection)
-4. **DOWNLINK Mode** (Green): Transmit data to ground stations
+The **Mode Manager** autonomously drives the mission state machine, supporting key **Mission Scenarios**:
+1.  **Detumbling (B-dot)**: Rapid stabilization after deployment in **SAFE Mode**.
+2.  **Sun Pointing**: Maximize power generation in **NOMINAL Mode**.
+3.  **Nadir Pointing / Science**: High-precision target tracking in **SCIENCE Mode**.
+4.  **Fault Recovery**: Autonomous transition to **SAFE mode** upon fault detection and subsequent **Recovery**.
 
 **Mission Statistics (1 Hour Run)**:
 - **Duration**: 60 minutes
@@ -50,33 +75,21 @@ The **Mode Manager** autonomously drives the mission state machine:
 
 ## Key Features
 
--   **Attitude Determination**: Multiplicative Extended Kalman Filter (MEKF) fusing Magnetometer, Sun Sensor, and Star Tracker data.
--   **Control Algorithms**:
+-   **Estimation & Navigation**: Multiplicative Extended Kalman Filter (**MEKF**) fusing Magnetometer, Sun Sensor, and Star Tracker data.
+-   **Control Laws**:
     -   **B-Dot**: Magnetic detumbling for safe-mode operations.
     -   **PID & LQG**: Precision 3-axis pointing control using Reaction Wheels.
     -   **Wheel Desaturation**: Momentum management using magnetorquers.
+-   **FDIR (Fault Detection, Isolation, and Recovery)**: Sensor health monitoring and automatic mode switching logic.
+-   **Flight Executive**: **Task scheduling**, state machine management, and robust command parsing.
+-   **Communication**: **CCSDS Telemetry** packet encoding for attitude, orbit, and health data.
 -   **Simulation Engine**:
-    -   High-fidelity rigid body dynamics (Euler's equations).
-    -   Runge-Kutta 4 (RK4) integration.
+    -   High-fidelity rigid body dynamics (Euler's equations) with RK4 integration.
     -   J2 Perturbation orbit propagation.
     -   Realistic sensor/actuator models with noise and latency.
 -   **Mission Visualization**:
-    -   **Comprehensive Dashboard**: 12-panel unified view of all mission aspects
-    -   **3D Trajectory**: Interactive orbit visualization with Earth sphere.
-    -   **Ground Track**: Latitude/longitude projection on 2D world map.
-    -   **Orbital Elements**: Time-series analysis of Keplerian elements (SMA, eccentricity, inclination, RAAN, argument of perigee).
-    -   **GNC Performance**: Real-time pointing error, control torques, momentum tracking
-    -   **Mission Progress**: Mode transitions, data collection/downlink metrics
--   **FDIR (Fault Detection, Isolation, and Recovery)**: Sensor health monitoring and automatic mode switching.
--   **Communication & Command**:
-    -   **CCSDS Telemetry**: Packet encoding for attitude, orbit, and health data.
-    -   **Command Handling**: Robust command parsing and execution (e.g., "Slew to Nadir", "Set PID Gains").
-    -   **Ground Station Simulation**: Simulated ground segment for commanding and telemetry monitoring.
--   **Optimization**: Genetic algorithms for automatic controller gain tuning and Monte Carlo robustness analysis.
--   **Autonomous Mission**: 
-    -   **Full Timeline Simulation**: Deployment → Detumble → Science → Downlink
-    -   **Auto Mode Transitions**: Rate-based and pointing-based state machine
-    -   **Performance Profiling**: Real-time overhead measurement
+    -   **Comprehensive Dashboard**: 12-panel unified view of all mission aspects.
+    -   **3D Trajectory & Ground Track**: Interactive orbit and 2D map projections.
 
 ## Project Structure
 

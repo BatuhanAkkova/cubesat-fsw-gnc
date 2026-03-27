@@ -5,6 +5,10 @@ add_executable(test_math test_math.cpp)
 target_link_libraries(test_math PRIVATE common gtest_main)
 gtest_discover_tests(test_math)
 
+add_executable(test_transforms test_transforms.cpp)
+target_link_libraries(test_transforms PRIVATE fsw_lib common gtest_main)
+gtest_discover_tests(test_transforms)
+
 # DataStore tests
 add_executable(test_datastore test_datastore.cpp)
 target_link_libraries(test_datastore PRIVATE fsw_lib gtest_main)
@@ -63,6 +67,11 @@ add_executable(lqg_performance_demo fsw/lqg_performance_demo.cpp)
 target_link_libraries(lqg_performance_demo PRIVATE sim_engine fsw_lib common gtest_main)
 gtest_discover_tests(lqg_performance_demo)
 
+# PID Controller Tests
+add_executable(pid_test fsw/gnc/control/PID_test.cpp)
+target_link_libraries(pid_test PRIVATE fsw_lib common gtest_main)
+gtest_discover_tests(pid_test)
+
 # FDIR Tests
 add_executable(sensor_health_test fdir/sensor_health_test.cpp)
 target_link_libraries(sensor_health_test PRIVATE fsw_lib common gtest_main)
@@ -71,6 +80,10 @@ gtest_discover_tests(sensor_health_test)
 add_executable(fdir_integration_test fdir/fdir_integration_test.cpp)
 target_link_libraries(fdir_integration_test PRIVATE fsw_lib sim_engine common gtest_main)
 gtest_discover_tests(fdir_integration_test)
+
+add_executable(fault_injection_test fdir/fault_injection_test.cpp)
+target_link_libraries(fault_injection_test PRIVATE fsw_lib sim_engine common gtest_main)
+gtest_discover_tests(fault_injection_test)
 
 # Controller Gain Test
 add_executable(controller_gain_test controller_gain_test.cpp)

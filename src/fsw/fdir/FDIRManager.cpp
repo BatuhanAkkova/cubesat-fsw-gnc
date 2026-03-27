@@ -10,6 +10,7 @@ FDIRManager::FDIRManager() {
     // Mark gyroscope as critical sensor
     critical_sensors_.insert("gyro");
     critical_sensors_.insert("gyro_primary");
+    critical_sensors_.insert("gyro_backup");
 }
 
 void FDIRManager::registerRedundantPair(const std::string& group_name,

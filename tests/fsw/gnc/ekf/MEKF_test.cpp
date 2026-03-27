@@ -111,3 +111,48 @@ TEST_F(MEKFTest, BiasEstimation) {
     EXPECT_NEAR(final_bias.y(), 0.0, 0.01);
     EXPECT_NEAR(final_bias.z(), 0.0, 0.01);
 }
+
+TEST_F(MEKFTest, LostInSpace) {
+    // Large initial error and high uncertainty
+    Quaternion true_q = Quaternion::Identity();
+    Quaternion initial_est = Quaternion(AngleAxis(PI/2, Vector3::UnitY())); // 90 deg error
+    
+    MatrixX P0 = MatrixX::Identity(6, 6) * 2.0; // High uncertainty
+    mekf.initialize(initial_est, Vector3::Zero(), P0);
+    
+    Matrix3 R = Matrix3::Identity() * 0.01;
+    
+    // Perform several updates with truth
+    for (int i = 0; i < 20; ++i) {
+        mekf.update_quat(true_q, R);
+        
+        // Mock predict with zero motion
+        mekf.predict(Vector3::Zero(), 0.1, MatrixX::Identity(6, 6) * 1e-6);
+    }
+    
+    double error = AngleAxis(mekf.getAttitude() * true_q.inverse()).angle();
+    EXPECT_LT(error, 0.05); // Should converge
+    
+    // Covariance should decrease
+    EXPECT_LT(mekf.getCovariance().trace(), P0.trace());
+}
+
+TEST_F(MEKFTest, BiasWalk) {
+    // Verify filter can track a slowly changing bias
+    mekf.initialize(Quaternion::Identity(), Vector3::Zero(), MatrixX::Identity(6, 6) * 0.1);
+    
+    double dt = 0.1;
+    MatrixX Q = MatrixX::Identity(6, 6) * 1e-4; // High process noise for bias
+    Matrix3 R = Matrix3::Identity() * 0.01;
+    
+    Vector3 walking_bias(0.1, 0.0, 0.0);
+    
+    for (int i = 0; i < 200; ++i) {
+        walking_bias.x() += 0.0001; // Slow drift
+        
+        mekf.predict(walking_bias, dt, Q);
+        mekf.update_quat(Quaternion::Identity(), R);
+    }
+    
+    EXPECT_NEAR(mekf.getBias().x(), walking_bias.x(), 0.01);
+}
