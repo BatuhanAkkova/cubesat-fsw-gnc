@@ -1,22 +1,17 @@
 #include "WheelDesaturation.hpp"
-#include <cmath>
+
 #include <algorithm>
+#include <cmath>
 
 namespace fsw {
 namespace gnc {
 namespace control {
 
 WheelDesaturation::WheelDesaturation(const Config& config)
-    : config_(config),
-      state_(State::IDLE),
-      max_momentum_(0.0),
-      total_momentum_(0.0),
-      time_in_state_(0.0) {
-}
+    : config_(config), state_(State::IDLE), max_momentum_(0.0), total_momentum_(0.0), time_in_state_(0.0) {}
 
 common::Vector3 WheelDesaturation::update(const std::vector<std::shared_ptr<hal::IRW>>& wheels,
-                                          const common::Vector3& b_field_body,
-                                          double dt) {
+                                          const common::Vector3& b_field_body, double dt) {
     // Update time in state
     time_in_state_ += dt;
 
@@ -52,8 +47,7 @@ void WheelDesaturation::reset() {
     time_in_state_ = 0.0;
 }
 
-common::Vector3 WheelDesaturation::computeTotalMomentum(
-        const std::vector<std::shared_ptr<hal::IRW>>& wheels) const {
+common::Vector3 WheelDesaturation::computeTotalMomentum(const std::vector<std::shared_ptr<hal::IRW>>& wheels) const {
     // For simplicity, assume wheels are aligned with body axes [X, Y, Z]
     common::Vector3 h_total = common::Vector3::Zero();
 
@@ -66,8 +60,7 @@ common::Vector3 WheelDesaturation::computeTotalMomentum(
     return h_total;
 }
 
-double WheelDesaturation::computeMaxMomentum(
-        const std::vector<std::shared_ptr<hal::IRW>>& wheels) const {
+double WheelDesaturation::computeMaxMomentum(const std::vector<std::shared_ptr<hal::IRW>>& wheels) const {
     if (wheels.empty()) {
         return 0.0;
     }
@@ -125,26 +118,26 @@ common::Vector3 WheelDesaturation::computeBCrossH(const common::Vector3& h_wheel
                                                   const common::Vector3& b_field) const {
     // B-cross-H control law: M_cmd = -k * (h × B) × B / |B|^2
     // This produces a dipole moment perpendicular to B that reduces h along B
-    
+
     double b_magnitude_sq = b_field.squaredNorm();
-    
+
     if (b_magnitude_sq < config_.min_b_field_magnitude * config_.min_b_field_magnitude) {
         return common::Vector3::Zero();
     }
 
     // Compute h × B
     common::Vector3 h_cross_B = h_wheels.cross(b_field);
-    
+
     // Compute (h × B) × B / |B|^2
     common::Vector3 h_cross_B_cross_B = h_cross_B.cross(b_field) / b_magnitude_sq;
-    
+
     // Apply gain and negative sign
     // Negative sign because we want to reduce momentum (torque opposes h)
     common::Vector3 dipole_cmd = -config_.desat_gain * h_cross_B_cross_B;
-    
+
     return dipole_cmd;
 }
 
-} // namespace control
-} // namespace gnc
-} // namespace fsw
+}  // namespace control
+}  // namespace gnc
+}  // namespace fsw

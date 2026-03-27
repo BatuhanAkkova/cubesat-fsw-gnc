@@ -1,9 +1,10 @@
-#include <iostream>
 #include <fstream>
+#include <iostream>
+
 #include "common/ConfigLoader.hpp"
-#include "sim/Simulation.hpp"
-#include "fsw/FlightSoftware.hpp"
 #include "common/logger.hpp"
+#include "fsw/FlightSoftware.hpp"
+#include "sim/Simulation.hpp"
 
 int main(int argc, char* argv[]) {
     std::string config_path = "sample_config.json";
@@ -21,7 +22,7 @@ int main(int argc, char* argv[]) {
         fsw::FlightSoftware flight_software(fsw_cfg);
 
         double dt = 0.1;
-        double duration = 100.0; // Increased for better professional plotting
+        double duration = 100.0;  // Increased for better professional plotting
         int steps = static_cast<int>(duration / dt);
 
         std::ofstream csv("mission_data.csv");
@@ -32,22 +33,22 @@ int main(int argc, char* argv[]) {
         for (int i = 0; i < steps; ++i) {
             double t = i * dt;
             auto sensors = simulation.getSensors();
-            std::vector<std::vector<uint8_t>> raw_commands; 
-            
+            std::vector<std::vector<uint8_t>> raw_commands;
+
             common::Vector3 torque_cmd = flight_software.step(sensors, raw_commands, dt);
             simulation.step(dt, torque_cmd);
 
             auto q = simulation.getAttitude();
             auto w = simulation.getAngularRate();
-            
+
             // Calculate pointing error (simplified)
             common::Vector3 body_z = q * common::Vector3(0, 0, 1);
             common::Vector3 sun_inertial(1, 0, 0);
             double cos_theta = body_z.dot(sun_inertial);
             double error_deg = std::acos(std::clamp(cos_theta, -1.0, 1.0)) * 57.2958;
 
-            csv << t << "," << q.w() << "," << q.x() << "," << q.y() << "," << q.z() << ","
-                << w.x() << "," << w.y() << "," << w.z() << "," << error_deg << "\n";
+            csv << t << "," << q.w() << "," << q.x() << "," << q.y() << "," << q.z() << "," << w.x() << "," << w.y()
+                << "," << w.z() << "," << error_deg << "\n";
 
             if (i % 100 == 0) {
                 common::LogInfo("Step {}: t={:.1f}s | Pointing Error: {:.2f} deg", i, t, error_deg);

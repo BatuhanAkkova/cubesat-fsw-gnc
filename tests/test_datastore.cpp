@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include <thread>
 #include <string>
+#include <thread>
+
 #include "fsw/core/DataStore.hpp"
 
 using namespace fsw;
@@ -43,15 +44,13 @@ TEST(DataStoreTest, ThreadSafety) {
 
     // Multiple publishers
     for (int i = 0; i < N; ++i) {
-        threads.emplace_back([&ds, i]() {
-            ds.publish("thread_topic", i);
-        });
+        threads.emplace_back([&ds, i]() { ds.publish("thread_topic", i); });
     }
 
     for (auto& t : threads) {
         t.join();
     }
-    
+
     int val = 0;
     EXPECT_TRUE(ds.get("thread_topic", val));
 }

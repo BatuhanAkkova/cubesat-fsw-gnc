@@ -8,15 +8,15 @@ namespace control {
 
 /**
  * @brief B-Dot Magnetic Controller
- * 
+ *
  * Implements the B-Dot control law: M = -K * B_dot
  * Use to detumble the spacecraft.
  */
 class Bdot : public interfaces::IController {
-public:
+   public:
     /**
      * @brief Constructor
-     * @param gain Controller gain [Am^2 * s / T] typically. 
+     * @param gain Controller gain [Am^2 * s / T] typically.
      */
     explicit Bdot(double gain);
 
@@ -28,22 +28,20 @@ public:
      * @param dt Time step [seconds]
      * @return Commanded dipole moment [Am^2] in Body frame
      */
-    common::Vector3 update(const common::SensorData& sensors,
-                          const common::State& state_curr,
-                          const common::GuidanceTarget& target,
-                          double dt) override;
+    common::Vector3 update(const common::SensorData& sensors, const common::State& state_curr,
+                           const common::GuidanceTarget& target, double dt) override;
 
     /**
      * @brief Reset the controller state (e.g. previous measurement)
      */
     void reset() override;
 
-private:
+   private:
     double gain_;
     common::Vector3 b_prev_;
     bool first_run_;
 };
 
-} // namespace control
-} // namespace gnc
-} // namespace fsw
+}  // namespace control
+}  // namespace gnc
+}  // namespace fsw

@@ -1,13 +1,14 @@
 #include "test/MonteCarloRunner.hpp"
-#include "common/logger.hpp"
-#include <iomanip>
+
 #include <chrono>
+#include <iomanip>
+
+#include "common/logger.hpp"
 
 namespace test {
 
-MonteCarloRunner::MonteCarloRunner(const Config& config) 
-    : config_(config), 
-      gen_(std::chrono::system_clock::now().time_since_epoch().count()) {}
+MonteCarloRunner::MonteCarloRunner(const Config& config)
+    : config_(config), gen_(std::chrono::system_clock::now().time_since_epoch().count()) {}
 
 void MonteCarloRunner::run() {
     int successes = 0;
@@ -21,14 +22,14 @@ void MonteCarloRunner::run() {
         if (res.success) successes++;
 
         if ((i + 1) % 10 == 0) {
-            common::LogInfo("Progress: {}/{} | Current Success Rate: {:.2f}%", 
-                            (i + 1), config_.num_runs, (double)successes / (i + 1) * 100.0);
+            common::LogInfo("Progress: {}/{} | Current Success Rate: {:.2f}%", (i + 1), config_.num_runs,
+                            (double)successes / (i + 1) * 100.0);
         }
     }
 
     common::LogInfo("\n=== MONTE CARLO RESULTS ===");
     common::LogInfo("Overall Success Rate: {:.2f}%", (double)successes / config_.num_runs * 100.0);
-    
+
     // Summary of failures (could be more detailed)
 }
 
@@ -39,12 +40,12 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
 
     // 1. Randomize Simulation Config
     sim::Simulation::Config sim_cfg;
-    
+
     // Perturb inertia diagonal
     for (int i = 0; i < 3; ++i) {
-        sim_cfg.inertia(i, i) *= std::max(0.5, norm(run_gen)); 
+        sim_cfg.inertia(i, i) *= std::max(0.5, norm(run_gen));
     }
-    
+
     // Random initial tumble
     std::uniform_real_distribution<double> w_dist(-0.2, 0.2);
     sim_cfg.init_w = common::Vector3(w_dist(run_gen), w_dist(run_gen), w_dist(run_gen));
@@ -54,14 +55,11 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
     // 2. Setup FSW
     fsw::FlightSoftware::Config fsw_cfg;
     fsw_cfg.full_config = {
-        {"fsw", {
-            {"controllers", {
-                {"attitude", {{"type", "PID"}, {"nominal_pid", {{"kp", 0.8}, {"ki", 0.05}, {"kd", 1.2}}}}},
-                {"detumble", {{"type", "Bdot"}, {"gain", 50000.0}}}
-            }},
-            {"estimator", {{"type", "MEKF"}}}
-        }}
-    };
+        {"fsw",
+         {{"controllers",
+           {{"attitude", {{"type", "PID"}, {"nominal_pid", {{"kp", 0.8}, {"ki", 0.05}, {"kd", 1.2}}}}},
+            {"detumble", {{"type", "Bdot"}, {"gain", 50000.0}}}}},
+          {"estimator", {{"type", "MEKF"}}}}}};
     fsw::FlightSoftware fsw(fsw_cfg);
 
     // 3. Inject random failures
@@ -73,7 +71,7 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
     MonteCarloResult res;
     res.success = true;
     res.max_pointing_error_deg = 0.0;
-    
+
     double dt = config_.dt;
     for (double t = 0; t < config_.duration; t += dt) {
         common::SensorData sensors = sim.getSensors();
@@ -101,17 +99,17 @@ MonteCarloResult MonteCarloRunner::runSingleSimulation(int seed) {
     // 5. Final verification
     if (res.success) {
         res.final_rate_rads = sim.getAngularRate().norm();
-        if (res.final_rate_rads > config_.pass_rate_rads * 5.0) { // Slack for MC
-             res.success = false;
-             res.failure_reason = "Final rate too high";
+        if (res.final_rate_rads > config_.pass_rate_rads * 5.0) {  // Slack for MC
+            res.success = false;
+            res.failure_reason = "Final rate too high";
         }
         if (res.max_pointing_error_deg > config_.pass_pointing_error_deg * 5.0) {
-             res.success = false;
-             res.failure_reason = "Pointing error too high";
+            res.success = false;
+            res.failure_reason = "Pointing error too high";
         }
     }
 
     return res;
 }
 
-} // namespace test
+}  // namespace test

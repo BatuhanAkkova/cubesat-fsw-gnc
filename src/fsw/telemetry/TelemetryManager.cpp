@@ -1,6 +1,8 @@
 #include "TelemetryManager.hpp"
-#include "fsw/fdir/FDIRConfig.hpp"
+
 #include <iostream>
+
+#include "fsw/fdir/FDIRConfig.hpp"
 
 namespace fsw {
 namespace telemetry {
@@ -51,5 +53,5 @@ std::vector<std::vector<uint8_t>> TelemetryManager::flushPackets() {
     return temp;
 }
 
-} // namespace telemetry
-} // namespace fsw
+}  // namespace telemetry
+}  // namespace fsw

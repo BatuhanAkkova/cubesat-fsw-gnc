@@ -1,17 +1,18 @@
 #pragma once
 
+#include <random>
+
 #include "hal/interfaces/IStarTracker.hpp"
 #include "sim/dynamics/RigidBody.hpp"
-#include <random>
 
 namespace sim {
 namespace models {
 
 class SimStarTracker : public hal::IStarTracker {
-public:
+   public:
     /**
      * @brief Construct a new Sim Star Tracker object
-     * 
+     *
      * @param body Reference to RigidBody for ground truth
      * @param noise_std Standard deviation of noise per axis [rad] typically small for ST
      */
@@ -19,7 +20,7 @@ public:
 
     common::Quaternion getOrientation() const override;
 
-private:
+   private:
     const dynamics::RigidBody& body_;
     double noise_std_;
 
@@ -27,5 +28,5 @@ private:
     mutable std::normal_distribution<double> dist_;
 };
 
-} // namespace models
-} // namespace sim
+}  // namespace models
+}  // namespace sim

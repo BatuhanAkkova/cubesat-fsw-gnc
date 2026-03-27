@@ -1,13 +1,14 @@
 #pragma once
 
-#include "common/time.hpp"
-#include "common/logger.hpp"
-#include <vector>
-#include <functional>
 #include <chrono>
-#include <thread>
+#include <functional>
 #include <mutex>
 #include <string>
+#include <thread>
+#include <vector>
+
+#include "common/logger.hpp"
+#include "common/time.hpp"
 
 namespace fsw {
 namespace core {
@@ -21,7 +22,7 @@ struct Task {
     double period_sec;                     // Execution period in seconds (e.g., 0.1 for 10Hz)
     double last_execution_time;            // Last execution timestamp
     int priority;                          // Higher value = higher priority
-    
+
     Task(const std::string& n, std::function<void(double)> cb, double period, int prio = 0)
         : name(n), callback(cb), period_sec(period), last_execution_time(-period), priority(prio) {}
 };
@@ -34,14 +35,13 @@ struct SchedulerStats {
     double max_jitter_ms;
     int cycles_executed;
     int task_overruns;
-    
-    SchedulerStats() : avg_jitter_ms(0.0), max_jitter_ms(0.0), 
-                       cycles_executed(0), task_overruns(0) {}
+
+    SchedulerStats() : avg_jitter_ms(0.0), max_jitter_ms(0.0), cycles_executed(0), task_overruns(0) {}
 };
 
 /**
  * @brief Deterministic task scheduler for real-time GNC loops
- * 
+ *
  * Executes registered tasks at fixed rates. Supports:
  * - Multiple tasks at different frequencies
  * - Priority-based execution
@@ -49,7 +49,7 @@ struct SchedulerStats {
  * - Simulation time vs. wall-clock time
  */
 class TaskScheduler {
-public:
+   public:
     /**
      * @brief Constructor
      * @param base_dt Base time step for scheduler [seconds]
@@ -83,12 +83,16 @@ public:
     /**
      * @brief Get current simulation time
      */
-    double getCurrentTime() const { return current_time_; }
+    double getCurrentTime() const {
+        return current_time_;
+    }
 
     /**
      * @brief Get scheduler statistics
      */
-    SchedulerStats getStats() const { return stats_; }
+    SchedulerStats getStats() const {
+        return stats_;
+    }
 
     /**
      * @brief Reset scheduler (clear tasks and time)
@@ -100,7 +104,7 @@ public:
      */
     void clearTasks();
 
-private:
+   private:
     /**
      * @brief Execute all tasks that are due
      */
@@ -116,12 +120,12 @@ private:
     bool use_real_time_;
     double current_time_;
     bool running_;
-    
+
     SchedulerStats stats_;
     std::chrono::high_resolution_clock::time_point last_wall_time_;
-    
+
     std::mutex mutex_;
 };
 
-} // namespace core
-} // namespace fsw
+}  // namespace core
+}  // namespace fsw

@@ -1,10 +1,11 @@
 #pragma once
 
-#include <vector>
-#include <random>
 #include <iostream>
-#include "sim/Simulation.hpp"
+#include <random>
+#include <vector>
+
 #include "fsw/FlightSoftware.hpp"
+#include "sim/Simulation.hpp"
 
 namespace test {
 
@@ -16,21 +17,21 @@ struct MonteCarloResult {
 };
 
 class MonteCarloRunner {
-public:
+   public:
     struct Config {
         int num_runs = 100;
         double duration = 100.0;
         double dt = 0.1;
-        
+
         // Randomization ranges
-        double inertia_variation = 0.2; // +/- 20%
+        double inertia_variation = 0.2;  // +/- 20%
         double gyro_noise_max = 0.01;
         double mag_noise_max = 1e-6;
-        
+
         // Failure probabilities
         double prob_dead_gyro = 0.05;
         double prob_dead_wheel = 0.05;
-        
+
         double pass_pointing_error_deg = 10.0;
         double pass_rate_rads = 0.02;
     };
@@ -39,11 +40,11 @@ public:
 
     void run();
 
-private:
+   private:
     MonteCarloResult runSingleSimulation(int seed);
 
     Config config_;
     std::mt19937 gen_;
 };
 
-} // namespace test
+}  // namespace test

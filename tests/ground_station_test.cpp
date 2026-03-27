@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
-#include "sim/GroundStation.hpp"
-#include "fsw/telemetry/TelemetryService.hpp"
+
 #include "common/types.hpp"
+#include "fsw/telemetry/TelemetryService.hpp"
+#include "sim/GroundStation.hpp"
 
 using namespace sim;
 using namespace fsw::telemetry;
@@ -44,7 +45,7 @@ TEST(GroundStationTest, CreateSetPidGainsCommand) {
 
 TEST(GroundStationTest, ProcessTelemetry) {
     GroundStation gs;
-    
+
     // Create mock telemetry using TelemetryService
     common::Quaternion q(0.707, 0.0, 0.707, 0.0);
     common::Vector3 omega(0.01, -0.02, 0.03);
@@ -57,7 +58,7 @@ TEST(GroundStationTest, ProcessTelemetry) {
     auto health_packet = TelemetryService::encodeHealth("StarTracker_1", fsw::fdir::HealthStatus::HEALTHY);
 
     std::vector<std::vector<uint8_t>> packets = {att_packet, orbit_packet, health_packet};
-    
+
     gs.processTelemetry(packets);
 
     // Verify decoded attitude
@@ -75,7 +76,7 @@ TEST(GroundStationTest, ProcessTelemetry) {
     EXPECT_EQ(health_map["StarTracker_1"].status, fsw::fdir::HealthStatus::HEALTHY);
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

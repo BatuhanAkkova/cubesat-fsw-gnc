@@ -17,12 +17,12 @@ struct SimRWConfig {
 
 /**
  * @brief Simulated Reaction Wheel model.
- * 
+ *
  * Models first-order dynamics of a reaction wheel:
  * J_w * dw/dt = tau_motor - tau_friction
  */
 class SimRW : public hal::IRW {
-public:
+   public:
     using Config = SimRWConfig;
 
     SimRW(const Config& config);
@@ -33,14 +33,16 @@ public:
     double getAngularMomentum() const override;
     double getMaxTorque() const override;
     double getMaxMomentum() const override;
-    void stop() override { commanded_torque_ = 0.0; }
+    void stop() override {
+        commanded_torque_ = 0.0;
+    }
 
     // Simulation Interface
     /**
      * @brief Step the wheel dynamics.
-     * 
+     *
      * @param dt Time step in seconds.
-     * @return double Torque exerted on the body (reaction torque). 
+     * @return double Torque exerted on the body (reaction torque).
      *                Note: Torque on Body = - (Torque on Wheel).
      */
     double step(double dt);
@@ -50,15 +52,19 @@ public:
      */
     void setSpeed(double speed_rad_s);
 
-    void injectFailure_Dead() { is_dead_ = true; }
-    void setEfficiency(double efficiency) { efficiency_ = efficiency; }
+    void injectFailure_Dead() {
+        is_dead_ = true;
+    }
+    void setEfficiency(double efficiency) {
+        efficiency_ = efficiency;
+    }
 
-private:
+   private:
     Config config_;
-    double current_speed_;      // rad/s
-    double commanded_torque_;   // Nm
+    double current_speed_;     // rad/s
+    double commanded_torque_;  // Nm
     bool is_dead_ = false;
     double efficiency_ = 1.0;
 };
 
-} // namespace sim
+}  // namespace sim

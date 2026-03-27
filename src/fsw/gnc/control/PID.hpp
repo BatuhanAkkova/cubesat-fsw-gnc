@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+
 #include "fsw/gnc/interfaces/IController.hpp"
 
 namespace fsw {
@@ -11,20 +12,20 @@ namespace control {
  * @brief Discrete PID Controller with anti-windup.
  */
 class PID {
-public:
+   public:
     struct Config {
         double kp;
         double ki;
         double kd;
-        double limit;           // Output limit (saturation)
-        double anti_windup_limit; // I-term clamp
+        double limit;              // Output limit (saturation)
+        double anti_windup_limit;  // I-term clamp
     };
 
     PID(const Config& config) : config_(config), integral_(0.0), last_error_(0.0), first_run_(true) {}
 
     /**
      * @brief Compute PID output.
-     * 
+     *
      * @param error Current error (setpoint - feedback)
      * @param dt Sampling time in seconds
      * @return double Controller effort
@@ -39,7 +40,7 @@ public:
         integral_ += error * dt;
         double i_term = config_.ki * integral_;
         i_term = std::max(-config_.anti_windup_limit, std::min(config_.anti_windup_limit, i_term));
-        
+
         // Update integral_ to match clamped i_term if ki != 0
         if (std::abs(config_.ki) > 1e-9) {
             integral_ = i_term / config_.ki;
@@ -73,9 +74,11 @@ public:
         config_.kd = kd;
     }
 
-    Config getConfig() const { return config_; }
+    Config getConfig() const {
+        return config_;
+    }
 
-private:
+   private:
     Config config_;
     double integral_;
     double last_error_;
@@ -83,6 +86,6 @@ private:
     bool first_run_;
 };
 
-} // namespace control
-} // namespace gnc
-} // namespace fsw
+}  // namespace control
+}  // namespace gnc
+}  // namespace fsw

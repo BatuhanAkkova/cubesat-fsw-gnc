@@ -1,9 +1,9 @@
 #pragma once
 
+#include "common/logger.hpp"
+#include "common/types.hpp"
 #include "fsw/core/Command.hpp"
 #include "fsw/core/DataStore.hpp"
-#include "common/types.hpp"
-#include "common/logger.hpp"
 
 namespace fsw {
 namespace core {
@@ -13,7 +13,7 @@ namespace commands {
  * @brief Command to change guidance mode to Target pointing and set the target quaternion.
  */
 class SlewToTargetCommand : public Command {
-public:
+   public:
     explicit SlewToTargetCommand(const common::Quaternion& target_q) : target_q_(target_q) {}
 
     bool execute() override {
@@ -28,10 +28,10 @@ public:
         return "SlewToTarget";
     }
 
-private:
+   private:
     common::Quaternion target_q_;
 };
 
-} // namespace commands
-} // namespace core
-} // namespace fsw
+}  // namespace commands
+}  // namespace core
+}  // namespace fsw

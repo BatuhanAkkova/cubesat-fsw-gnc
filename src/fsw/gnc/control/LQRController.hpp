@@ -8,18 +8,18 @@ namespace control {
 
 /**
  * @brief Linear Quadratic Regulator (LQR) for attitude control.
- * 
+ *
  * Computes control torque: u = -K * x
  * where x is the state vector [delta_theta (3x1), delta_omega (3x1)]^T
  * and K is the 3x6 gain matrix.
  */
 class LQRController {
-public:
+   public:
     struct Config {
-        common::MatrixX K; // Gain matrix (3 x 6)
-        
+        common::MatrixX K;  // Gain matrix (3 x 6)
+
         Config() : K(common::MatrixX::Zero(3, 6)) {}
-        
+
         /**
          * @brief Initialize with diagonal weights (simplified)
          * @param q_rot weighting for attitude error
@@ -29,8 +29,8 @@ public:
             Config cfg;
             cfg.K = common::MatrixX::Zero(3, 6);
             for (int i = 0; i < 3; ++i) {
-                cfg.K(i, i) = q_rot;      // Proportional-like gain
-                cfg.K(i, i + 3) = q_rate; // Derivative-like gain
+                cfg.K(i, i) = q_rot;       // Proportional-like gain
+                cfg.K(i, i + 3) = q_rate;  // Derivative-like gain
             }
             return cfg;
         }
@@ -59,12 +59,14 @@ public:
         }
     }
 
-    const Config& getConfig() const { return config_; }
+    const Config& getConfig() const {
+        return config_;
+    }
 
-private:
+   private:
     Config config_;
 };
 
-} // namespace control
-} // namespace gnc
-} // namespace fsw
+}  // namespace control
+}  // namespace gnc
+}  // namespace fsw

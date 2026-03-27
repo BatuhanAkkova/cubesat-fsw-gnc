@@ -1,9 +1,9 @@
 #pragma once
 
-#include <cstdint>
-#include <vector>
-#include <cstring>
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
+#include <vector>
 
 namespace fsw {
 namespace telemetry {
@@ -11,7 +11,7 @@ namespace telemetry {
 /**
  * @brief CCSDS Primary Header (6 bytes)
  * Based on CCSDS 133.0-B-1 (Space Packet Protocol)
- * 
+ *
  * Note: CCSDS headers are Big-endian.
  */
 struct CCSDSHeader {
@@ -20,7 +20,7 @@ struct CCSDSHeader {
     uint16_t packet_length;  // Length (16b) = Total bytes - 7
 
     // Helpers to set/get fields (handling bitfields manually for endianness safety)
-    
+
     void setVersion(uint8_t version) {
         packet_id = (packet_id & 0x1FFF) | ((version & 0x07) << 13);
     }
@@ -46,23 +46,19 @@ struct CCSDSHeader {
     }
 
     void setLength(uint16_t length) {
-        packet_length = length - 1; // CCSDS length is (total payload bytes + secondary header - 1)
+        packet_length = length - 1;  // CCSDS length is (total payload bytes + secondary header - 1)
     }
 
     // Convert to network byte order (Big Endian)
     void toNetworkOrder() {
-        packet_id = ( (packet_id & 0xFF00) >> 8) | ((packet_id & 0x00FF) << 8);
-        sequence_ctrl = ( (sequence_ctrl & 0xFF00) >> 8) | ((sequence_ctrl & 0x00FF) << 8);
-        packet_length = ( (packet_length & 0xFF00) >> 8) | ((packet_length & 0x00FF) << 8);
+        packet_id = ((packet_id & 0xFF00) >> 8) | ((packet_id & 0x00FF) << 8);
+        sequence_ctrl = ((sequence_ctrl & 0xFF00) >> 8) | ((sequence_ctrl & 0x00FF) << 8);
+        packet_length = ((packet_length & 0xFF00) >> 8) | ((packet_length & 0x00FF) << 8);
     }
 };
 
 // APID Definitions
-enum class APID : uint16_t {
-    ATTITUDE = 100,
-    ORBIT    = 101,
-    HEALTH   = 102
-};
+enum class APID : uint16_t { ATTITUDE = 100, ORBIT = 101, HEALTH = 102 };
 
 /**
  * @brief CCSDS Command Secondary Header
@@ -73,5 +69,5 @@ struct CommandSecondaryHeader {
     // Add more fields if needed (e.g. checksum, time tag)
 };
 
-} // namespace telemetry
-} // namespace fsw
+}  // namespace telemetry
+}  // namespace fsw

@@ -1,32 +1,33 @@
 #pragma once
 
-#include "SensorHealthMonitor.hpp"
-#include "FDIRConfig.hpp"
-#include "common/types.hpp"
-#include "common/logger.hpp"
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <unordered_set>
-#include <string>
+
+#include "FDIRConfig.hpp"
+#include "SensorHealthMonitor.hpp"
+#include "common/logger.hpp"
+#include "common/types.hpp"
 
 // Forward declarations
 namespace fsw {
 namespace core {
-    class ModeManager;
+class ModeManager;
 }
 namespace gnc {
 namespace ekf {
-    class MEKF;
+class MEKF;
 }
-}
-}
+}  // namespace gnc
+}  // namespace fsw
 
 namespace fsw {
 namespace fdir {
 
 /**
  * @brief System-wide FDIR manager coordinating all sensor health monitors
- * 
+ *
  * Responsibilities:
  * - Manage multiple SensorHealthMonitor instances
  * - Aggregate system health status
@@ -34,7 +35,7 @@ namespace fdir {
  * - Publish health telemetry
  */
 class FDIRManager {
-public:
+   public:
     /**
      * @brief Constructor
      */
@@ -55,9 +56,8 @@ public:
      * @param sensor_name Unique identifier
      * @param config Gyro-specific configuration
      */
-    SensorHealthMonitor<common::Vector3>* registerGyro(
-        const std::string& sensor_name,
-        const GyroHealthConfig& config = GyroHealthConfig());
+    SensorHealthMonitor<common::Vector3>* registerGyro(const std::string& sensor_name,
+                                                       const GyroHealthConfig& config = GyroHealthConfig());
 
     /**
      * @brief Register magnetometer with standard configuration
@@ -65,8 +65,7 @@ public:
      * @param config Magnetometer-specific configuration
      */
     SensorHealthMonitor<common::Vector3>* registerMagnetometer(
-        const std::string& sensor_name,
-        const MagnetometerHealthConfig& config = MagnetometerHealthConfig());
+        const std::string& sensor_name, const MagnetometerHealthConfig& config = MagnetometerHealthConfig());
 
     /**
      * @brief Update a specific sensor monitor
@@ -74,9 +73,7 @@ public:
      * @param measurement Sensor reading
      * @param current_time Mission time [seconds]
      */
-    void updateSensor(const std::string& sensor_name, 
-                      const common::Vector3& measurement,
-                      double current_time);
+    void updateSensor(const std::string& sensor_name, const common::Vector3& measurement, double current_time);
 
     /**
      * @brief Update a specific sensor monitor (quaternion version for star tracker)
@@ -84,9 +81,7 @@ public:
      * @param measurement Sensor reading
      * @param current_time Mission time [seconds]
      */
-    void updateSensor(const std::string& sensor_name,
-                      const common::Quaternion& measurement,
-                      double current_time);
+    void updateSensor(const std::string& sensor_name, const common::Quaternion& measurement, double current_time);
 
     /**
      * @brief Get health status of a specific sensor
@@ -135,12 +130,16 @@ public:
     /**
      * @brief Enable/disable automatic MEKF reset on sensor failure
      */
-    void enableAutoMEKFReset(bool enable) { auto_mekf_reset_ = enable; }
+    void enableAutoMEKFReset(bool enable) {
+        auto_mekf_reset_ = enable;
+    }
 
     /**
      * @brief Enable/disable automatic mode transitions on critical failure
      */
-    void enableAutoModeTransition(bool enable) { auto_mode_transition_ = enable; }
+    void enableAutoModeTransition(bool enable) {
+        auto_mode_transition_ = enable;
+    }
 
     /**
      * @brief Register a redundant sensor pair
@@ -148,8 +147,7 @@ public:
      * @param primary_name Name of the primary sensor
      * @param backup_name Name of the backup sensor
      */
-    void registerRedundantPair(const std::string& group_name,
-                               const std::string& primary_name,
+    void registerRedundantPair(const std::string& group_name, const std::string& primary_name,
                                const std::string& backup_name);
 
     /**
@@ -159,13 +157,11 @@ public:
      */
     std::string getActiveSensor(const std::string& group_name) const;
 
-private:
+   private:
     /**
      * @brief Handle sensor status change events
      */
-    void handleStatusChange(const std::string& sensor_name, 
-                           HealthStatus new_status,
-                           const std::string& message);
+    void handleStatusChange(const std::string& sensor_name, HealthStatus new_status, const std::string& message);
 
     /**
      * @brief Execute response actions based on sensor failure
@@ -179,7 +175,7 @@ private:
 
     // Sensor monitors storage
     std::unordered_map<std::string, std::unique_ptr<SensorHealthMonitor<common::Vector3>>> vector_monitors_;
-    
+
     // Redundancy management
     struct RedundancyGroup {
         std::string primary;
@@ -202,5 +198,5 @@ private:
     std::unordered_set<std::string> critical_sensors_;
 };
 
-} // namespace fdir
-} // namespace fsw
+}  // namespace fdir
+}  // namespace fsw

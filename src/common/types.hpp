@@ -19,7 +19,7 @@ using Matrix3 = Eigen::Matrix3d;
 using Matrix6 = Eigen::Matrix<double, 6, 6>;
 using MatrixX = Eigen::MatrixXd;
 
-// Quaternion type (Eigen stores complex part first: x, y, z, w internally, 
+// Quaternion type (Eigen stores complex part first: x, y, z, w internally,
 // but constructor is w, x, y, z)
 using Quaternion = Eigen::Quaterniond;
 using AngleAxis = Eigen::AngleAxisd;
@@ -27,9 +27,9 @@ using AngleAxis = Eigen::AngleAxisd;
 // Generic GNC state and target structures
 struct State {
     common::Quaternion q;
-    common::Vector3 w; // body frame
-    common::Vector3 pos; // eci
-    common::Vector3 vel; // eci
+    common::Vector3 w;    // body frame
+    common::Vector3 pos;  // eci
+    common::Vector3 vel;  // eci
 };
 
 struct GuidanceTarget {
@@ -38,4 +38,4 @@ struct GuidanceTarget {
     std::string mode;
 };
 
-} // namespace common
+}  // namespace common

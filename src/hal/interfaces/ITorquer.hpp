@@ -8,10 +8,12 @@ namespace hal {
  * @brief Interface for a Magnetorquer actuator.
  */
 class ITorquer : public IActuator {
-public:
+   public:
     virtual ~ITorquer() = default;
 
-    std::string getName() const override { return "Torquer"; }
+    std::string getName() const override {
+        return "Torquer";
+    }
 
     /**
      * @brief Command a magnetic dipole moment.
@@ -20,4 +22,4 @@ public:
     virtual void setDipole(const common::Vector3& dipole_moment_Am2) = 0;
 };
 
-} // namespace hal
+}  // namespace hal

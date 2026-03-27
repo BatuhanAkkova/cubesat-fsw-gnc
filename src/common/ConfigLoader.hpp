@@ -1,7 +1,8 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
 #include <fstream>
+#include <nlohmann/json.hpp>
+
 #include "fsw/FlightSoftware.hpp"
 #include "sim/Simulation.hpp"
 
@@ -11,7 +12,7 @@ namespace common {
  * @brief Utility class to load FSW and Simulation configurations from JSON.
  */
 class ConfigLoader {
-public:
+   public:
     using json = nlohmann::json;
 
     /**
@@ -20,13 +21,13 @@ public:
     static fsw::FlightSoftware::Config loadFSWConfig(const std::string& path) {
         std::ifstream f(path);
         json data = json::parse(f);
-        
+
         fsw::FlightSoftware::Config cfg;
-        cfg.full_config = data; // Store full config for factory
-        
+        cfg.full_config = data;  // Store full config for factory
+
         if (data.contains("fsw")) {
             auto fsw_json = data["fsw"];
-            
+
             // Mode Transition Config (if present)
             if (fsw_json.contains("mode_manager")) {
                 auto mm = fsw_json["mode_manager"];
@@ -51,9 +52,8 @@ public:
 
         if (sim_json.contains("inertia")) {
             auto inertia = sim_json["inertia"];
-            cfg.inertia << inertia[0][0], inertia[0][1], inertia[0][2],
-                           inertia[1][0], inertia[1][1], inertia[1][2],
-                           inertia[2][0], inertia[2][1], inertia[2][2];
+            cfg.inertia << inertia[0][0], inertia[0][1], inertia[0][2], inertia[1][0], inertia[1][1], inertia[1][2],
+                inertia[2][0], inertia[2][1], inertia[2][2];
         }
 
         if (sim_json.contains("init_w")) {
@@ -65,4 +65,4 @@ public:
     }
 };
 
-} // namespace common
+}  // namespace common

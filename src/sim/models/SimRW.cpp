@@ -1,14 +1,11 @@
 #include "sim/models/SimRW.hpp"
+
 #include <algorithm>
 #include <cmath>
 
 namespace sim {
 
-SimRW::SimRW(const Config& config) 
-    : config_(config), 
-      current_speed_(config.initial_speed), 
-      commanded_torque_(0.0) {
-}
+SimRW::SimRW(const Config& config) : config_(config), current_speed_(config.initial_speed), commanded_torque_(0.0) {}
 
 void SimRW::setTorqueCommand(double torque_nm) {
     // Saturate command
@@ -57,17 +54,16 @@ double SimRW::step(double dt) {
     if (current_momentum >= config_.max_momentum) {
         // If speed is + and torque is +, clamp
         if (current_speed_ > 0 && net_torque > 0) {
-            net_torque = 0; 
-        }
-        else if (current_speed_ < 0 && net_torque < 0) {
+            net_torque = 0;
+        } else if (current_speed_ < 0 && net_torque < 0) {
             net_torque = 0;
         }
     }
 
     double angular_accel = net_torque / config_.inertia;
     current_speed_ += angular_accel * dt;
-    
-    return -net_torque; 
+
+    return -net_torque;
 }
 
-} // namespace sim
+}  // namespace sim

@@ -1,13 +1,13 @@
 #pragma once
 
+#include <any>
+#include <functional>
+#include <iostream>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
-#include <functional>
 #include <vector>
-#include <mutex>
-#include <memory>
-#include <any>
-#include <iostream>
 
 #include "common/logger.hpp"
 
@@ -15,12 +15,12 @@ namespace fsw {
 
 /**
  * @brief Thread-safe DataStore for Pub/Sub.
- * 
+ *
  * Allows modules to subscribe to data topics and publish updates.
  * Simplified implementation using std::any for type erasure (C++17).
  */
 class DataStore {
-public:
+   public:
     using Callback = std::function<void(const std::any&)>;
 
     static DataStore& Instance() {
@@ -35,7 +35,7 @@ public:
     template <typename T>
     void publish(const std::string& topic, const T& data) {
         std::lock_guard<std::mutex> lock(mutex_);
-        
+
         // Update current value
         data_map_[topic] = data;
 
@@ -50,7 +50,7 @@ public:
     template <typename T>
     void subscribe(const std::string& topic, std::function<void(const T&)> callback) {
         std::lock_guard<std::mutex> lock(mutex_);
-        
+
         // Wrap the typed callback into a generic std::any callback
         auto wrapper = [callback](const std::any& data) {
             try {
@@ -85,7 +85,7 @@ public:
         subscribers_.clear();
     }
 
-private:
+   private:
     DataStore() = default;
 
     std::mutex mutex_;
@@ -93,4 +93,4 @@ private:
     std::unordered_map<std::string, std::vector<Callback>> subscribers_;
 };
 
-} // namespace fsw
+}  // namespace fsw

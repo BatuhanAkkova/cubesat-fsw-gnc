@@ -1,4 +1,5 @@
 #include "sim/Simulation.hpp"
+
 #include <iostream>
 
 namespace sim {
@@ -13,13 +14,13 @@ Simulation::Simulation(const Config& config) {
 
 void Simulation::step(double dt, const common::Vector3& torque_cmd) {
     sim_time_ += dt;
-    
+
     // Update orbit
     orbit_->step(dt);
-    
+
     // Update magnetic field time
     mag_->setTime(sim_time_);
-    
+
     // Update dynamics (external torque only for now, can add internal components later)
     body_->step(dt, torque_cmd);
 }
@@ -29,12 +30,12 @@ common::SensorData Simulation::getSensors() const {
     sensors.mag_body = mag_->read();
     sensors.gyro_body = gyro_->read();
     sensors.q_measured = st_->getOrientation();
-    
+
     // Compute Sun vector in body frame (simplified: Sun is at [1, 0, 0] in Inertial)
-    common::Vector3 sun_inertial(1, 0, 0); 
+    common::Vector3 sun_inertial(1, 0, 0);
     sensors.sun_body = body_->getAttitude().conjugate() * sun_inertial;
-    
+
     return sensors;
 }
 
-} // namespace sim
+}  // namespace sim

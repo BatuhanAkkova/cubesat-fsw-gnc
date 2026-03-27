@@ -1,6 +1,7 @@
 #pragma once
-#include "hal/interfaces/ITorquer.hpp"
 #include <algorithm>
+
+#include "hal/interfaces/ITorquer.hpp"
 
 namespace sim {
 namespace models {
@@ -9,7 +10,7 @@ namespace models {
  * @brief Simulated Magnetorquer
  */
 class SimTorquer : public hal::ITorquer {
-public:
+   public:
     /**
      * @brief Constructor
      * @param max_dipole Maximum dipole moment [Am^2] per axis.
@@ -18,7 +19,9 @@ public:
 
     // From ITorquer
     void setDipole(const common::Vector3& dipole_moment_Am2) override;
-    void stop() override { current_dipole_ = common::Vector3::Zero(); }
+    void stop() override {
+        current_dipole_ = common::Vector3::Zero();
+    }
 
     /**
      * @brief Get the actual dipole moment produced by the torquer (includes saturation).
@@ -26,10 +29,10 @@ public:
      */
     common::Vector3 getDipole() const;
 
-private:
+   private:
     double max_dipole_;
     common::Vector3 current_dipole_;
 };
 
-} // namespace models
-} // namespace sim
+}  // namespace models
+}  // namespace sim

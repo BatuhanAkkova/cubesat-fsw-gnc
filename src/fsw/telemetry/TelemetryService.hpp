@@ -1,10 +1,11 @@
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include "CCSDS.hpp"
 #include "common/types.hpp"
 #include "fsw/fdir/FDIRConfig.hpp"
-#include <vector>
-#include <string>
 
 namespace fsw {
 namespace telemetry {
@@ -13,7 +14,7 @@ namespace telemetry {
  * @brief Service to encode FSW data into CCSDS packets.
  */
 class TelemetryService {
-public:
+   public:
     /**
      * @brief Encode attitude data (quaternion and angular velocity)
      */
@@ -29,11 +30,11 @@ public:
      */
     static std::vector<uint8_t> encodeHealth(const std::string& sensor_name, fdir::HealthStatus status);
 
-private:
+   private:
     static std::vector<uint8_t> preparePacket(APID apid, uint16_t payload_size);
     static void appendDouble(std::vector<uint8_t>& buffer, double value);
-    static uint16_t sequence_counts_[2048]; // One for each APID
+    static uint16_t sequence_counts_[2048];  // One for each APID
 };
 
-} // namespace telemetry
-} // namespace fsw
+}  // namespace telemetry
+}  // namespace fsw

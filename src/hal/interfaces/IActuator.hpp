@@ -7,7 +7,7 @@ namespace hal {
  * @brief Base interface for all actuators (Torquers, Reaction Wheels, etc.).
  */
 class IActuator {
-public:
+   public:
     virtual ~IActuator() = default;
 
     /**
@@ -23,7 +23,9 @@ public:
     /**
      * @brief Check if the actuator is healthy.
      */
-    virtual bool isHealthy() const { return true; }
+    virtual bool isHealthy() const {
+        return true;
+    }
 };
 
-} // namespace hal
+}  // namespace hal

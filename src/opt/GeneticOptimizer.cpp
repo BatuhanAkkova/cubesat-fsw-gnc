@@ -1,27 +1,26 @@
 #include "opt/GeneticOptimizer.hpp"
-#include "common/logger.hpp"
+
 #include <chrono>
+
+#include "common/logger.hpp"
 
 namespace opt {
 
-GeneticOptimizer::GeneticOptimizer(const Config& config) 
-    : config_(config), 
-      gen_(std::chrono::system_clock::now().time_since_epoch().count()) {
-}
+GeneticOptimizer::GeneticOptimizer(const Config& config)
+    : config_(config), gen_(std::chrono::system_clock::now().time_since_epoch().count()) {}
 
 std::vector<double> GeneticOptimizer::optimize() {
     initializePopulation();
 
     for (int g = 0; g < config_.num_generations; ++g) {
         evaluatePopulation();
-        
-        // Sort by cost (ascending)
-        std::sort(population_.begin(), population_.end(), 
-            [](const Individual& a, const Individual& b) { return a.cost < b.cost; });
 
-        common::LogInfo("Generation {} | Best Cost: {:.4f} | Gains: [{:.2f}, {:.2f}, {:.2f}]", 
-                        g, population_[0].cost, population_[0].genes[0], 
-                        population_[0].genes[1], population_[0].genes[2]);
+        // Sort by cost (ascending)
+        std::sort(population_.begin(), population_.end(),
+                  [](const Individual& a, const Individual& b) { return a.cost < b.cost; });
+
+        common::LogInfo("Generation {} | Best Cost: {:.4f} | Gains: [{:.2f}, {:.2f}, {:.2f}]", g, population_[0].cost,
+                        population_[0].genes[0], population_[0].genes[1], population_[0].genes[2]);
 
         if (g < config_.num_generations - 1) {
             evolve();
@@ -54,19 +53,19 @@ void GeneticOptimizer::evaluatePopulation() {
 
 void GeneticOptimizer::evolve() {
     std::vector<Individual> next_gen;
-    
+
     // 1. Keep elites
     for (int i = 0; i < config_.num_elites; ++i) {
         next_gen.push_back(population_[i]);
     }
 
     // 2. Breed the rest
-    std::uniform_int_distribution<int> parent_dist(0, config_.num_elites * 2); // Sample from top performers
-    
+    std::uniform_int_distribution<int> parent_dist(0, config_.num_elites * 2);  // Sample from top performers
+
     while (next_gen.size() < (size_t)config_.population_size) {
         int idx1 = parent_dist(gen_) % population_.size();
         int idx2 = parent_dist(gen_) % population_.size();
-        
+
         Individual child = breed(population_[idx1], population_[idx2]);
         mutate(child);
         next_gen.push_back(child);
@@ -100,4 +99,4 @@ void GeneticOptimizer::mutate(Individual& ind) {
     }
 }
 
-} // namespace opt
+}  // namespace opt

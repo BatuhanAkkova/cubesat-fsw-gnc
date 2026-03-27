@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include "common/types.hpp"
+
 #include "common/time.hpp"
+#include "common/types.hpp"
 
 using namespace common;
 
@@ -21,7 +22,7 @@ TEST(TimeTest, SpacecraftTime) {
     SpacecraftTime t2(15.0);
 
     EXPECT_TRUE(t2 > t1);
-    
+
     auto t3 = t1 + 5.0;
     EXPECT_DOUBLE_EQ(t3.as_seconds(), 15.0);
 }

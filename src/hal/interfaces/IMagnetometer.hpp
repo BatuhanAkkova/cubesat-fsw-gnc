@@ -8,10 +8,12 @@ namespace hal {
  * @brief Interface for a Magnetometer sensor.
  */
 class IMagnetometer : public ISensor {
-public:
+   public:
     virtual ~IMagnetometer() = default;
 
-    std::string getName() const override { return "Magnetometer"; }
+    std::string getName() const override {
+        return "Magnetometer";
+    }
 
     /**
      * @brief Read the current magnetic field vector.
@@ -20,4 +22,4 @@ public:
     virtual common::Vector3 read() = 0;
 };
 
-} // namespace hal
+}  // namespace hal

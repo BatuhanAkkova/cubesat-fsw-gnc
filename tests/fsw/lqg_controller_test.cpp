@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
-#include "fsw/gnc/control/LQRController.hpp"
+
 #include "fsw/gnc/control/LQGController.hpp"
+#include "fsw/gnc/control/LQRController.hpp"
 #include "fsw/gnc/ekf/MEKF.hpp"
 
 using namespace fsw::gnc::control;
@@ -14,8 +15,8 @@ TEST(LQRControllerTest, BasicTorqueCalculation) {
     cfg.K = common::MatrixX::Zero(3, 6);
     // Set diagonal gains
     for (int i = 0; i < 3; ++i) {
-        cfg.K(i, i) = 1.0;     // Kp-like
-        cfg.K(i, i + 3) = 0.5; // Kd-like
+        cfg.K(i, i) = 1.0;      // Kp-like
+        cfg.K(i, i + 3) = 0.5;  // Kd-like
     }
 
     LQRController lqr(cfg);
@@ -23,7 +24,7 @@ TEST(LQRControllerTest, BasicTorqueCalculation) {
     // Test case 1: Positive error in attitude, positive error in rate
     common::VectorX x(6);
     x << 1.0, 0.0, 0.0,  // delta_theta
-         0.2, 0.0, 0.0;  // delta_omega
+        0.2, 0.0, 0.0;   // delta_omega
 
     common::Vector3 torque = lqr.computeTorque(x);
 
@@ -39,13 +40,13 @@ TEST(LQRControllerTest, BasicTorqueCalculation) {
  */
 TEST(LQRControllerTest, SetGains) {
     LQRController lqr(LQRController::Config::Default());
-    
+
     common::MatrixX new_K = common::MatrixX::Ones(3, 6);
     lqr.setGains(new_K);
-    
+
     common::VectorX x = common::VectorX::Ones(6);
     common::Vector3 torque = lqr.computeTorque(x);
-    
+
     // u = -K * x = - [1,1,1,1,1,1] * [1,1,1,1,1,1]^T = -6 for each axis
     EXPECT_NEAR(torque.x(), -6.0, 1e-6);
     EXPECT_NEAR(torque.y(), -6.0, 1e-6);
@@ -57,7 +58,7 @@ TEST(LQRControllerTest, SetGains) {
  */
 TEST(LQGControllerTest, IntegrationWithMEKF) {
     auto mekf = std::make_shared<MEKF>();
-    
+
     // Initialize MEKF with identity attitude and zero bias
     common::Quaternion q0 = common::Quaternion::Identity();
     common::Vector3 beta0 = common::Vector3::Zero();
@@ -81,7 +82,7 @@ TEST(LQGControllerTest, IntegrationWithMEKF) {
     // q_target_inv is a -5 degree rotation about X
     // delta_theta = 2 * vec(q_err) = 2 * [sin(-2.5 deg), 0, 0] approx [-0.087, 0, 0]
     // u = -K * x = - [1.0 * delta_theta[0]] = - (-0.087) = 0.087
-    
+
     EXPECT_GT(torque.x(), 0.0);
     EXPECT_NEAR(torque.y(), 0.0, 1e-6);
     EXPECT_NEAR(torque.z(), 0.0, 1e-6);

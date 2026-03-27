@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 namespace fsw {
 namespace core {
@@ -11,7 +11,7 @@ namespace core {
  * @brief Abstract base class for all FSW commands.
  */
 class Command {
-public:
+   public:
     virtual ~Command() = default;
 
     /**
@@ -26,5 +26,5 @@ public:
     virtual std::string getName() const = 0;
 };
 
-} // namespace core
-} // namespace fsw
+}  // namespace core
+}  // namespace fsw

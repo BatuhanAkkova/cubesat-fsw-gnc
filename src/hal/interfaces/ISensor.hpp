@@ -7,7 +7,7 @@ namespace hal {
  * @brief Base interface for all sensors.
  */
 class ISensor {
-public:
+   public:
     virtual ~ISensor() = default;
 
     /**
@@ -18,7 +18,9 @@ public:
     /**
      * @brief Check if the sensor is healthy.
      */
-    virtual bool isHealthy() const { return true; }
+    virtual bool isHealthy() const {
+        return true;
+    }
 };
 
-} // namespace hal
+}  // namespace hal

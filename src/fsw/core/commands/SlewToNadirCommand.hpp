@@ -1,8 +1,8 @@
 #pragma once
 
+#include "common/logger.hpp"
 #include "fsw/core/Command.hpp"
 #include "fsw/core/DataStore.hpp"
-#include "common/logger.hpp"
 
 namespace fsw {
 namespace core {
@@ -12,7 +12,7 @@ namespace commands {
  * @brief Command to change guidance mode to Nadir pointing.
  */
 class SlewToNadirCommand : public Command {
-public:
+   public:
     bool execute() override {
         common::LogInfo("Executing SlewToNadirCommand");
         // Publish to DataStore to notify guidance/FlightSoftware
@@ -25,6 +25,6 @@ public:
     }
 };
 
-} // namespace commands
-} // namespace core
-} // namespace fsw
+}  // namespace commands
+}  // namespace core
+}  // namespace fsw

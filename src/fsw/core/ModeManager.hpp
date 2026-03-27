@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common/types.hpp"
-#include "common/logger.hpp"
-#include "fsw/gnc/control/Bdot.hpp"
-#include "fsw/gnc/control/AttitudeController.hpp"
-#include <memory>
 #include <functional>
+#include <memory>
+
+#include "common/logger.hpp"
+#include "common/types.hpp"
+#include "fsw/gnc/control/AttitudeController.hpp"
+#include "fsw/gnc/control/Bdot.hpp"
 
 namespace fsw {
 namespace core {
@@ -33,15 +34,15 @@ struct ModeTransitionConfig {
 
 /**
  * @brief Finite State Machine for managing mission modes
- * 
+ *
  * Manages automatic transitions between:
  * - SAFE mode: Uses B-Dot for detumbling
  * - NOMINAL mode: Uses PID-based attitude control
- * 
+ *
  * Transitions are based on angular rate thresholds and time constraints.
  */
 class ModeManager {
-public:
+   public:
     using ModeChangeCallback = std::function<void(MissionMode, MissionMode)>;
 
     /**
@@ -60,7 +61,9 @@ public:
     /**
      * @brief Get current mission mode
      */
-    MissionMode getCurrentMode() const { return current_mode_; }
+    MissionMode getCurrentMode() const {
+        return current_mode_;
+    }
 
     /**
      * @brief Manually command a mode change
@@ -79,10 +82,10 @@ public:
 
     /**
      * @brief Force mode change (bypasses timing constraints)
-     * 
+     *
      * Used by FDIR to transition immediately during critical failures.
      * Unlike commandMode(), this does not check minimum time in mode.
-     * 
+     *
      * @param new_mode Target mode
      * @param reason Reason for forced transition (logged)
      */
@@ -91,7 +94,9 @@ public:
     /**
      * @brief Get time in current mode
      */
-    double getTimeInMode() const { return time_in_current_mode_; }
+    double getTimeInMode() const {
+        return time_in_current_mode_;
+    }
 
     /**
      * @brief Reset the mode manager to SAFE mode
@@ -103,7 +108,7 @@ public:
      */
     static std::string getModeString(MissionMode mode);
 
-private:
+   private:
     /**
      * @brief Evaluate and execute mode transitions
      */
@@ -122,10 +127,10 @@ private:
     MissionMode current_mode_;
     MissionMode previous_mode_;
     ModeTransitionConfig config_;
-    
+
     double time_in_current_mode_;
     ModeChangeCallback mode_change_callback_;
 };
 
-} // namespace core
-} // namespace fsw
+}  // namespace core
+}  // namespace fsw

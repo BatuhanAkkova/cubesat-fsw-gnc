@@ -1,9 +1,10 @@
 #include <gtest/gtest.h>
-#include "fsw/telemetry/TelemetryService.hpp"
-#include "fsw/telemetry/CCSDS.hpp"
-#include "common/types.hpp"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
+
+#include "common/types.hpp"
+#include "fsw/telemetry/CCSDS.hpp"
+#include "fsw/telemetry/TelemetryService.hpp"
 
 using namespace fsw::telemetry;
 
@@ -11,7 +12,7 @@ TEST(TelemetryTest, CCSDSHeaderEncoding) {
     CCSDSHeader header;
     header.packet_id = 0;
     header.sequence_ctrl = 0;
-    
+
     header.setVersion(0);
     header.setType(0);
     header.setSecondaryHeaderFlag(false);
@@ -24,7 +25,7 @@ TEST(TelemetryTest, CCSDSHeaderEncoding) {
 
     // Verify manual bit manipulation (Big Endian results)
     uint8_t* raw = reinterpret_cast<uint8_t*>(&header);
-    
+
     // Packet ID: (0 << 13) | (0 << 12) | (0 << 11) | 100 = 100 (0x0064)
     // Big Endian 0x0064 -> [0x00, 0x64]
     EXPECT_EQ(raw[0], 0x00);
@@ -48,7 +49,7 @@ TEST(TelemetryTest, EncodeAttitude) {
     auto packet = TelemetryService::encodeAttitude(q, omega);
 
     EXPECT_EQ(packet.size(), 6 + 56);
-    
+
     // Check APID in header (Attitude = 100 = 0x64)
     EXPECT_EQ(packet[0], 0x00);
     EXPECT_EQ(packet[1], 0x64);
@@ -71,7 +72,7 @@ TEST(TelemetryTest, EncodeHealth) {
     EXPECT_EQ(packet[10], 'U');
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

@@ -4,7 +4,7 @@ ColumnLimit: 120
 AllowShortFunctionsOnASingleLine: Empty
 DerivePointerAlignment: false
 PointerAlignment: Left
-Standard: Cpp17
+Standard: c++17
 IncludeCategories:
   - Regex:           '^<.*'
     Priority:        1

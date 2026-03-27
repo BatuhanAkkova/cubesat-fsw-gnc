@@ -1,7 +1,8 @@
 #include "sim/GroundStation.hpp"
-#include <iostream>
+
 #include <algorithm>
 #include <cstring>
+#include <iostream>
 
 namespace sim {
 
@@ -12,16 +13,17 @@ GroundStation::GroundStation() {
     last_orbit_.velocity = common::Vector3::Zero();
 }
 
-fsw::telemetry::CCSDSHeader GroundStation::createCommandHeader(fsw::telemetry::CommandAPID apid, uint16_t payload_size) {
+fsw::telemetry::CCSDSHeader GroundStation::createCommandHeader(fsw::telemetry::CommandAPID apid,
+                                                               uint16_t payload_size) {
     fsw::telemetry::CCSDSHeader header;
     header.packet_id = 0;
     header.sequence_ctrl = 0;
-    
+
     header.setVersion(0);
-    header.setType(1); // 1 for Command
+    header.setType(1);  // 1 for Command
     header.setSecondaryHeaderFlag(true);
     header.setAPID(static_cast<uint16_t>(apid));
-    header.setSequenceFlags(0x03); // Standalone packet
+    header.setSequenceFlags(0x03);  // Standalone packet
     header.setSequenceCount(command_sequence_count_++);
     header.setLength(6 + sizeof(fsw::telemetry::CommandSecondaryHeader) + payload_size);
 
@@ -32,29 +34,29 @@ fsw::telemetry::CCSDSHeader GroundStation::createCommandHeader(fsw::telemetry::C
 void GroundStation::appendDouble(std::vector<uint8_t>& buffer, double value) {
     uint8_t temp[8];
     std::memcpy(temp, &value, 8);
-    
+
     // CCSDS is Big-Endian. Reverse if host is Little-Endian.
     // For simplicity, we reverse as our FSW TelemetryService does.
-    for(int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; ++i) {
         uint8_t t = temp[i];
-        temp[i] = temp[7-i];
-        temp[7-i] = t;
+        temp[i] = temp[7 - i];
+        temp[7 - i] = t;
     }
-    
+
     buffer.insert(buffer.end(), temp, temp + 8);
 }
 
 double GroundStation::readDouble(const uint8_t* data, size_t& offset) {
     uint8_t temp[8];
     std::memcpy(temp, data + offset, 8);
-    
+
     // Reverse from Big Endian
-    for(int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; ++i) {
         uint8_t t = temp[i];
-        temp[i] = temp[7-i];
-        temp[7-i] = t;
+        temp[i] = temp[7 - i];
+        temp[7 - i] = t;
     }
-    
+
     double val;
     std::memcpy(&val, temp, 8);
     offset += 8;
@@ -69,7 +71,7 @@ std::vector<uint8_t> GroundStation::createSlewToNadirCommand() {
     std::vector<uint8_t> packet(6 + sizeof(fsw::telemetry::CommandSecondaryHeader));
     std::memcpy(packet.data(), &header, 6);
     std::memcpy(packet.data() + 6, &sec_header, sizeof(fsw::telemetry::CommandSecondaryHeader));
-    
+
     return packet;
 }
 
@@ -86,7 +88,7 @@ std::vector<uint8_t> GroundStation::createSlewToTargetCommand(const common::Quat
     appendDouble(packet, target_q.y());
     appendDouble(packet, target_q.z());
     appendDouble(packet, target_q.w());
-    
+
     return packet;
 }
 
@@ -103,7 +105,7 @@ std::vector<uint8_t> GroundStation::createSetPidGainsCommand(double kp, double k
     appendDouble(packet, ki);
     appendDouble(packet, kd);
     packet.push_back(is_nominal ? 1 : 0);
-    
+
     return packet;
 }
 
@@ -116,7 +118,7 @@ void GroundStation::processTelemetry(const std::vector<std::vector<uint8_t>>& pa
         uint16_t apid_val = packet_id & 0x07FF;
         uint8_t type = (packet_id >> 12) & 0x01;
 
-        if (type != 0) continue; // Not telemetry
+        if (type != 0) continue;  // Not telemetry
 
         size_t payload_offset = 6;
         if (apid_val == static_cast<uint16_t>(fsw::telemetry::APID::ATTITUDE)) {
@@ -128,8 +130,7 @@ void GroundStation::processTelemetry(const std::vector<std::vector<uint8_t>>& pa
             last_attitude_.omega.x() = readDouble(raw_packet.data(), payload_offset);
             last_attitude_.omega.y() = readDouble(raw_packet.data(), payload_offset);
             last_attitude_.omega.z() = readDouble(raw_packet.data(), payload_offset);
-        }
-        else if (apid_val == static_cast<uint16_t>(fsw::telemetry::APID::ORBIT)) {
+        } else if (apid_val == static_cast<uint16_t>(fsw::telemetry::APID::ORBIT)) {
             if (raw_packet.size() < 6 + 48) continue;
             last_orbit_.position.x() = readDouble(raw_packet.data(), payload_offset);
             last_orbit_.position.y() = readDouble(raw_packet.data(), payload_offset);
@@ -137,15 +138,14 @@ void GroundStation::processTelemetry(const std::vector<std::vector<uint8_t>>& pa
             last_orbit_.velocity.x() = readDouble(raw_packet.data(), payload_offset);
             last_orbit_.velocity.y() = readDouble(raw_packet.data(), payload_offset);
             last_orbit_.velocity.z() = readDouble(raw_packet.data(), payload_offset);
-        }
-        else if (apid_val == static_cast<uint16_t>(fsw::telemetry::APID::HEALTH)) {
+        } else if (apid_val == static_cast<uint16_t>(fsw::telemetry::APID::HEALTH)) {
             if (raw_packet.size() < 6 + 2) continue;
             fsw::fdir::HealthStatus status = static_cast<fsw::fdir::HealthStatus>(raw_packet[6]);
             uint8_t name_len = raw_packet[7];
             if (raw_packet.size() < 8 + name_len) continue;
-            
+
             std::string name(reinterpret_cast<const char*>(raw_packet.data() + 8), name_len);
-            
+
             HealthTelemetry ht;
             ht.status = status;
             ht.sensor_name = name;
@@ -154,4 +154,4 @@ void GroundStation::processTelemetry(const std::vector<std::vector<uint8_t>>& pa
     }
 }
 
-} // namespace sim
+}  // namespace sim

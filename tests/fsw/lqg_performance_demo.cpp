@@ -1,12 +1,13 @@
+#include <cmath>
 #include <gtest/gtest.h>
-#include "sim/dynamics/RigidBody.hpp"
-#include "sim/models/SimRW.hpp"
+#include <iostream>
+#include <vector>
+
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/LQGController.hpp"
 #include "fsw/gnc/ekf/MEKF.hpp"
-#include <iostream>
-#include <vector>
-#include <cmath>
+#include "sim/dynamics/RigidBody.hpp"
+#include "sim/models/SimRW.hpp"
 
 #ifndef M_PI
 #define M_PI common::PI
@@ -15,27 +16,25 @@
 using namespace common;
 
 class LQGPerformanceDemo : public ::testing::Test {
-protected:
+   protected:
     void SetUp() override {
         Matrix3 inertia;
-        inertia << 0.1, 0.0, 0.0,
-                   0.0, 0.1, 0.0,
-                   0.0, 0.0, 0.1;
+        inertia << 0.1, 0.0, 0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 0.1;
 
-        Quaternion q_init(1, 0, 0, 0); 
+        Quaternion q_init(1, 0, 0, 0);
         Vector3 w_init(0, 0, 0);
 
         body_pid = std::make_unique<sim::dynamics::RigidBody>(inertia, q_init, w_init);
         body_lqg = std::make_unique<sim::dynamics::RigidBody>(inertia, q_init, w_init);
-        
+
         sim::SimRW::Config rw_cfg;
         rw_cfg.inertia = 0.001;
         rw_cfg.max_torque = 0.05;  // Physical wheel limit
-        rw_cfg.max_momentum = 1.0; 
+        rw_cfg.max_momentum = 1.0;
         rw_cfg.friction_coeff = 0.0001;
         rw_cfg.initial_speed = 0.0;
-        
-        for(int i=0; i<3; ++i) {
+
+        for (int i = 0; i < 3; ++i) {
             wheels_pid.push_back(std::make_unique<sim::SimRW>(rw_cfg));
             wheels_lqg.push_back(std::make_unique<sim::SimRW>(rw_cfg));
         }
@@ -50,8 +49,8 @@ protected:
         mekf = std::make_shared<fsw::gnc::ekf::MEKF>();
         // Realistic initial uncertainty
         common::MatrixX P0 = common::MatrixX::Identity(6, 6);
-        P0.block<3,3>(0,0) *= 1e-4; // 0.01 rad attitude uncertainty
-        P0.block<3,3>(3,3) *= 1e-6; // 0.001 rad/s bias uncertainty
+        P0.block<3, 3>(0, 0) *= 1e-4;  // 0.01 rad attitude uncertainty
+        P0.block<3, 3>(3, 3) *= 1e-6;  // 0.001 rad/s bias uncertainty
         mekf->initialize(q_init, Vector3::Zero(), P0);
 
         // LQR gains: very high damping to prevent overshoot with saturated actuators
@@ -75,7 +74,7 @@ TEST_F(LQGPerformanceDemo, CompareSlew) {
     double sim_time = 60.0;  // Longer time for slow convergence with low gains
     int steps = static_cast<int>(sim_time / dt);
 
-    Quaternion q_target(AngleAxis(M_PI/12.0, Vector3::UnitZ())); // 15 deg slew
+    Quaternion q_target(AngleAxis(M_PI / 12.0, Vector3::UnitZ()));  // 15 deg slew
 
     std::cout << "\n=== LQG Performance Demo: 15° Slew ===" << std::endl;
     std::cout << "Target: 15° rotation around Z-axis" << std::endl;
@@ -84,31 +83,32 @@ TEST_F(LQGPerformanceDemo, CompareSlew) {
     for (int i = 0; i < steps; ++i) {
         // PID Step
         // Note: AttitudeController::computeTorque re-inits PIDs every step, skipping for this demo comparison
-        
+
         // Feed command to wheels
         double time = i * dt;
-        
+
         // LQG Step
         // Tuning Q: very small bias drift, moderate attitude noise
         common::MatrixX Q = common::MatrixX::Identity(6, 6);
-        Q.block<3,3>(0,0) *= 1e-8; // Attitude process noise
-        Q.block<3,3>(3,3) *= 1e-10; // Bias process noise (drifts slowly)
+        Q.block<3, 3>(0, 0) *= 1e-8;   // Attitude process noise
+        Q.block<3, 3>(3, 3) *= 1e-10;  // Bias process noise (drifts slowly)
         mekf->predict(body_lqg->getAngularVelocity(), dt, Q);
-        mekf->update_quat(body_lqg->getAttitude(), Matrix3::Identity()*1e-8);
+        mekf->update_quat(body_lqg->getAttitude(), Matrix3::Identity() * 1e-8);
 
-        Vector3 torque_cmd_lqg = lqg_controller->computeTorque(q_target, Vector3::Zero(), body_lqg->getAngularVelocity());
-        
+        Vector3 torque_cmd_lqg =
+            lqg_controller->computeTorque(q_target, Vector3::Zero(), body_lqg->getAngularVelocity());
+
         // Scale torque to stay within actuator limits (anti-windup)
         double max_wheel_torque = 0.05;
         double max_cmd = torque_cmd_lqg.cwiseAbs().maxCoeff();
         if (max_cmd > max_wheel_torque) {
             torque_cmd_lqg *= (max_wheel_torque / max_cmd);
         }
-        
+
         // Accumulate and step LQG
         Vector3 total_int_torque_lqg = Vector3::Zero();
         Vector3 total_int_mom_lqg = Vector3::Zero();
-        for(int j=0; j<3; ++j) {
+        for (int j = 0; j < 3; ++j) {
             // SimRW::step() returns -commanded_torque (reaction on body)
             wheels_lqg[j]->setTorqueCommand(-torque_cmd_lqg[j]);
             double t = wheels_lqg[j]->step(dt);
@@ -127,11 +127,9 @@ TEST_F(LQGPerformanceDemo, CompareSlew) {
             Vector3 err_mekf = 2.0 * q_err_mekf.vec();
             double err_lqg = q_current.angularDistance(q_target) * 180.0 / M_PI;
             Vector3 w_lqg = body_lqg->getAngularVelocity();
-            
-            printf("[%d] t=%.2f | Err=%.1f° | body_err=[%.3f] | mekf_err=[%.3f] | omega=[%.3f] | torque=[%.3f]\n",
-                   i, time, err_lqg, 
-                   err_vec.z(), err_mekf.z(),
-                   w_lqg.z(), torque_cmd_lqg.z());
+
+            printf("[%d] t=%.2f | Err=%.1f° | body_err=[%.3f] | mekf_err=[%.3f] | omega=[%.3f] | torque=[%.3f]\n", i,
+                   time, err_lqg, err_vec.z(), err_mekf.z(), w_lqg.z(), torque_cmd_lqg.z());
         }
     }
     double final_err_lqg = body_lqg->getAttitude().angularDistance(q_target) * 180.0 / M_PI;

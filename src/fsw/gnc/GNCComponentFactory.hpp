@@ -1,15 +1,15 @@
 #pragma once
 
 #include <memory>
-#include <string>
 #include <nlohmann/json.hpp>
+#include <string>
 
-#include "fsw/gnc/interfaces/IEstimator.hpp"
-#include "fsw/gnc/interfaces/IController.hpp"
-#include "fsw/gnc/ekf/MEKF.hpp"
+#include "common/logger.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
-#include "common/logger.hpp"
+#include "fsw/gnc/ekf/MEKF.hpp"
+#include "fsw/gnc/interfaces/IController.hpp"
+#include "fsw/gnc/interfaces/IEstimator.hpp"
 
 namespace fsw {
 namespace gnc {
@@ -18,7 +18,7 @@ namespace gnc {
  * @brief Factory class to create GNC components from JSON configuration.
  */
 class GNCComponentFactory {
-public:
+   public:
     using json = nlohmann::json;
 
     static std::unique_ptr<interfaces::IEstimator> createEstimator(const json& config) {
@@ -30,14 +30,14 @@ public:
         std::string type = config["type"];
         if (type == "MEKF") {
             auto mek_ptr = std::make_unique<ekf::MEKF>();
-            
+
             // Optionally initialize with p0_diag/q_diag from config if present
             if (config.contains("p0_diag") && config["p0_diag"].is_array()) {
                 common::MatrixX P0 = common::MatrixX::Identity(6, 6);
-                for(int i=0; i<6; ++i) P0(i,i) = config["p0_diag"][i];
+                for (int i = 0; i < 6; ++i) P0(i, i) = config["p0_diag"][i];
                 mek_ptr->initialize(common::Quaternion::Identity(), common::Vector3::Zero(), P0);
             }
-            
+
             return mek_ptr;
         }
 
@@ -70,5 +70,5 @@ public:
     }
 };
 
-} // namespace gnc
-} // namespace fsw
+}  // namespace gnc
+}  // namespace fsw

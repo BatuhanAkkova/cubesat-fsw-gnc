@@ -1,7 +1,8 @@
 #pragma once
 
-#include "common/types.hpp"
 #include <cmath>
+
+#include "common/types.hpp"
 
 namespace fsw {
 namespace gnc {
@@ -11,17 +12,15 @@ namespace guidance {
  * @brief Utilities to calculate target quaternions from various constraints.
  */
 class PointingStrategies {
-public:
+   public:
     /**
      * @brief Create a target quaternion that aligns a body axis with an inertial vector.
-     * 
+     *
      * @param body_axis Vector in Body frame to align (e.g. [1, 0, 0] for X-face).
      * @param inertial_target Vector in Inertial frame to point at (e.g. Nadir, Sun).
      * @return common::Quaternion Target attitude (Body to Inertial).
      */
-    static common::Quaternion alignAxis(const common::Vector3& body_axis, 
-                                        const common::Vector3& inertial_target) {
-        
+    static common::Quaternion alignAxis(const common::Vector3& body_axis, const common::Vector3& inertial_target) {
         common::Vector3 b = body_axis.normalized();
         common::Vector3 i = inertial_target.normalized();
 
@@ -29,10 +28,10 @@ public:
         // q = [cos(theta/2), sin(theta/2) * axis]
         // axis = b x i / |b x i|
         // cos(theta) = b . i
-        
+
         common::Vector3 cross = b.cross(i);
         double dot = b.dot(i);
-        
+
         // Handle parallel/anti-parallel cases
         if (cross.norm() < 1e-9) {
             if (dot > 0) return common::Quaternion::Identity();
@@ -51,12 +50,11 @@ public:
      * @brief Constrained alignment (e.g. Point X at Sun, and keep Y near Nadir).
      * This is more complex, usually requires a triad-like approach.
      */
-    static common::Quaternion nadirPointing(const common::Vector3& sc_pos_eci, 
-                                             const common::Vector3& sc_vel_eci) {
+    static common::Quaternion nadirPointing(const common::Vector3& sc_pos_eci, const common::Vector3& sc_vel_eci) {
         // -Z face towards Earth (-pos)
         // Y face towards Orbit Normal (pos x vel)
         // X face towards velocityish
-        
+
         common::Vector3 z_body = -sc_pos_eci.normalized();
         common::Vector3 y_body = (sc_pos_eci.cross(sc_vel_eci)).normalized();
         common::Vector3 x_body = y_body.cross(z_body).normalized();
@@ -71,6 +69,6 @@ public:
     }
 };
 
-} // namespace guidance
-} // namespace gnc
-} // namespace fsw
+}  // namespace guidance
+}  // namespace gnc
+}  // namespace fsw

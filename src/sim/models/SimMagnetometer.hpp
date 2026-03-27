@@ -1,8 +1,9 @@
 #pragma once
-#include "hal/interfaces/IMagnetometer.hpp"
-#include "sim/dynamics/RigidBody.hpp"
-#include "sim/dynamics/Orbit.hpp"
 #include <random>
+
+#include "hal/interfaces/IMagnetometer.hpp"
+#include "sim/dynamics/Orbit.hpp"
+#include "sim/dynamics/RigidBody.hpp"
 
 namespace sim {
 namespace models {
@@ -10,21 +11,21 @@ namespace models {
 /**
  * @brief Simulated Magnetometer
  */
-    /**
-     * @brief Configuration for magnetic field model
-     */
-    struct SimMagnetometerConfig {
-        bool enable_earth_rotation;  // Enable time-varying field due to Earth rotation
-        bool use_tilted_dipole;     // Use tilted dipole (11 deg offset)
-        double noise_std;             // Standard deviation of noise [Tesla]
-        common::Vector3 bias; // Hard-iron bias [Tesla]
+/**
+ * @brief Configuration for magnetic field model
+ */
+struct SimMagnetometerConfig {
+    bool enable_earth_rotation;  // Enable time-varying field due to Earth rotation
+    bool use_tilted_dipole;      // Use tilted dipole (11 deg offset)
+    double noise_std;            // Standard deviation of noise [Tesla]
+    common::Vector3 bias;        // Hard-iron bias [Tesla]
 
-        SimMagnetometerConfig() : enable_earth_rotation(true), use_tilted_dipole(false), 
-                  noise_std(0.0), bias(common::Vector3::Zero()) {}
-    };
+    SimMagnetometerConfig()
+        : enable_earth_rotation(true), use_tilted_dipole(false), noise_std(0.0), bias(common::Vector3::Zero()) {}
+};
 
 class SimMagnetometer : public hal::IMagnetometer {
-public:
+   public:
     using Config = SimMagnetometerConfig;
 
     /**
@@ -33,8 +34,7 @@ public:
      * @param orbit Reference to Orbit (for position)
      * @param config Magnetometer configuration
      */
-    SimMagnetometer(const dynamics::RigidBody& body, const dynamics::Orbit& orbit,
-                    const Config& config = Config());
+    SimMagnetometer(const dynamics::RigidBody& body, const dynamics::Orbit& orbit, const Config& config = Config());
 
     common::Vector3 read() override;
 
@@ -44,10 +44,14 @@ public:
      */
     void setTime(double time_sec);
 
-    void injectFailure_Dead() { is_dead_ = true; }
-    void setScalingFactor(double factor) { scaling_factor_ = factor; }
+    void injectFailure_Dead() {
+        is_dead_ = true;
+    }
+    void setScalingFactor(double factor) {
+        scaling_factor_ = factor;
+    }
 
-private:
+   private:
     const dynamics::RigidBody& body_;
     const dynamics::Orbit& orbit_;
     Config config_;
@@ -63,5 +67,5 @@ private:
     common::Vector3 computeDipoleField(const common::Vector3& pos_eci, double time_sec) const;
 };
 
-} // namespace models
-} // namespace sim
+}  // namespace models
+}  // namespace sim

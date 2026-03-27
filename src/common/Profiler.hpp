@@ -1,11 +1,12 @@
 #pragma once
 
+#include <algorithm>
 #include <chrono>
 #include <map>
+#include <numeric>
 #include <string>
 #include <vector>
-#include <numeric>
-#include <algorithm>
+
 #include "common/logger.hpp"
 
 namespace common {
@@ -14,12 +15,12 @@ namespace common {
  * @brief Simple RAII profiler to measure execution time of code blocks.
  */
 class Profiler {
-public:
+   public:
     struct Stats {
         double total_time_ms = 0.0;
         double max_time_ms = 0.0;
         uint64_t count = 0;
-        
+
         double avg_time_ms() const {
             return count > 0 ? total_time_ms / count : 0.0;
         }
@@ -41,7 +42,7 @@ public:
         if (it != start_times_.end()) {
             auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - it->second);
             double ms = duration.count() / 1000.0;
-            
+
             Stats& s = stats_[name];
             s.total_time_ms += ms;
             s.count++;
@@ -62,8 +63,8 @@ public:
         common::LogInfo("{}", std::string(66, '-'));
 
         for (auto const& [name, s] : stats_) {
-            common::LogInfo("{:<20} {:>12.4f} {:>12.4f} {:>12.4f} {:>10}",
-                            name, s.avg_time_ms(), s.max_time_ms, s.total_time_ms, s.count);
+            common::LogInfo("{:<20} {:>12.4f} {:>12.4f} {:>12.4f} {:>10}", name, s.avg_time_ms(), s.max_time_ms,
+                            s.total_time_ms, s.count);
         }
         common::LogInfo("======================================\n");
     }
@@ -76,7 +77,7 @@ public:
         start_times_.clear();
     }
 
-private:
+   private:
     std::map<std::string, Stats> stats_;
     std::map<std::string, std::chrono::time_point<std::chrono::high_resolution_clock>> start_times_;
 };
@@ -85,19 +86,18 @@ private:
  * @brief Scoped timer for easier profiling.
  */
 class ScopedTimer {
-public:
-    ScopedTimer(Profiler& profiler, const std::string& name) 
-        : profiler_(profiler), name_(name) {
+   public:
+    ScopedTimer(Profiler& profiler, const std::string& name) : profiler_(profiler), name_(name) {
         profiler_.start(name_);
     }
-    
+
     ~ScopedTimer() {
         profiler_.stop(name_);
     }
 
-private:
+   private:
     Profiler& profiler_;
     std::string name_;
 };
 
-} // namespace common
+}  // namespace common

@@ -1,6 +1,6 @@
 #pragma once
-#include "common/types.hpp"
 #include "common/SensorData.hpp"
+#include "common/types.hpp"
 
 namespace fsw {
 namespace gnc {
@@ -10,7 +10,7 @@ namespace interfaces {
  * @brief Generic interface for GNC state estimators (EKF, UKF, etc.).
  */
 class IEstimator {
-public:
+   public:
     virtual ~IEstimator() = default;
 
     /**
@@ -39,6 +39,6 @@ public:
     virtual bool isValid() const = 0;
 };
 
-} // namespace interfaces
-} // namespace gnc
-} // namespace fsw
+}  // namespace interfaces
+}  // namespace gnc
+}  // namespace fsw

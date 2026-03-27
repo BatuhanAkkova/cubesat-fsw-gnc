@@ -4,16 +4,16 @@
 namespace sim {
 namespace dynamics {
 
-    /**
-     * @brief Configuration for orbit propagator
-     */
-    struct OrbitConfig {
-        bool enable_j2;  // Enable J2 oblateness perturbation
-        OrbitConfig() : enable_j2(true) {}
-    };
+/**
+ * @brief Configuration for orbit propagator
+ */
+struct OrbitConfig {
+    bool enable_j2;  // Enable J2 oblateness perturbation
+    OrbitConfig() : enable_j2(true) {}
+};
 
 class Orbit {
-public:
+   public:
     using Config = OrbitConfig;
 
     /**
@@ -22,8 +22,7 @@ public:
      * @param init_vel Initial velocity [m/s] in ECI
      * @param config Orbit propagator configuration
      */
-    Orbit(const common::Vector3& init_pos, const common::Vector3& init_vel, 
-          const Config& config = Config());
+    Orbit(const common::Vector3& init_pos, const common::Vector3& init_vel, const Config& config = Config());
 
     void step(double dt);
 
@@ -60,12 +59,12 @@ public:
      */
     double getArgumentOfPerigee() const;
 
-private:
+   private:
     common::VectorX state_;
     Config config_;
 
     common::VectorX dynamics(double t, const common::VectorX& y);
-    
+
     /**
      * @brief Compute J2 perturbation acceleration
      * @param pos Position vector [m] in ECI
@@ -74,5 +73,5 @@ private:
     common::Vector3 computeJ2Acceleration(const common::Vector3& pos) const;
 };
 
-} // namespace dynamics
-} // namespace sim
+}  // namespace dynamics
+}  // namespace sim

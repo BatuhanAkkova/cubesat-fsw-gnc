@@ -1,23 +1,23 @@
 #pragma once
 
 #include <fstream>
+#include <iomanip>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iomanip>
 
 namespace common {
 
 /**
  * @brief Simple CSV data logger for simulation data export
- * 
+ *
  * Usage:
  *   DataLogger logger("output.csv");
  *   logger.addColumn("time");
  *   logger.addColumn("qw");
  *   logger.addColumn("qx");
  *   logger.writeHeader();
- *   
+ *
  *   logger.startRow();
  *   logger.addValue(t);
  *   logger.addValue(q.w());
@@ -25,13 +25,12 @@ namespace common {
  *   logger.endRow();
  */
 class DataLogger {
-public:
+   public:
     /**
      * @brief Constructor
      * @param filename Output CSV filename
      */
-    explicit DataLogger(const std::string& filename) 
-        : filename_(filename), file_(filename), row_started_(false) {
+    explicit DataLogger(const std::string& filename) : filename_(filename), file_(filename), row_started_(false) {
         if (!file_.is_open()) {
             throw std::runtime_error("Failed to open file: " + filename);
         }
@@ -81,7 +80,7 @@ public:
      * @brief Add a value to the current row
      * @param value Value to add (any numeric type)
      */
-    template<typename T>
+    template <typename T>
     void addValue(T value) {
         if (!row_started_) {
             throw std::runtime_error("Must call startRow() before addValue()");
@@ -98,11 +97,10 @@ public:
         if (!row_started_) {
             throw std::runtime_error("No row to end");
         }
-        
+
         if (current_row_.size() != columns_.size()) {
-            throw std::runtime_error("Row size mismatch: expected " + 
-                std::to_string(columns_.size()) + " values, got " + 
-                std::to_string(current_row_.size()));
+            throw std::runtime_error("Row size mismatch: expected " + std::to_string(columns_.size()) +
+                                     " values, got " + std::to_string(current_row_.size()));
         }
 
         for (size_t i = 0; i < current_row_.size(); ++i) {
@@ -112,9 +110,9 @@ public:
             }
         }
         file_ << "\n";
-        
+
         row_started_ = false;
-        
+
         // Flush every 100 rows for reasonable performance
         if (++row_count_ % 100 == 0) {
             file_.flush();
@@ -135,7 +133,7 @@ public:
         return filename_;
     }
 
-private:
+   private:
     std::string filename_;
     std::ofstream file_;
     std::vector<std::string> columns_;
@@ -144,4 +142,4 @@ private:
     size_t row_count_ = 0;
 };
 
-} // namespace common
+}  // namespace common

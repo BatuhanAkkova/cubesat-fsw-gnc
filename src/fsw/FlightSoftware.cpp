@@ -1,25 +1,26 @@
 #include "fsw/FlightSoftware.hpp"
+
+#include <iostream>
+
 #include "fsw/core/CommandParser.hpp"
+#include "fsw/core/DataStore.hpp"
 #include "fsw/core/commands/SetPidGainsCommand.hpp"
 #include "fsw/gnc/GNCComponentFactory.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
-#include "fsw/core/DataStore.hpp"
-#include <iostream>
 
 namespace fsw {
 
-FlightSoftware::FlightSoftware(const Config& config) 
-    : config_(config) {
+FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
     mode_manager_ = std::make_unique<core::ModeManager>(config.mode_cfg);
-    
+
     // Initialize GNC components via Factory
     if (config.full_config.contains("fsw")) {
         auto fsw_json = config.full_config["fsw"];
-        
+
         if (fsw_json.contains("estimator")) {
             estimator_ = gnc::GNCComponentFactory::createEstimator(fsw_json["estimator"]);
         }
-        
+
         if (fsw_json.contains("controllers")) {
             auto ctrl_json = fsw_json["controllers"];
             if (ctrl_json.contains("attitude")) {
@@ -35,19 +36,16 @@ FlightSoftware::FlightSoftware(const Config& config)
     command_manager_ = std::make_unique<core::CommandManager>();
 
     // Subscribe to topics
-    DataStore::Instance().subscribe<std::string>("guidance/target_mode", [this](const std::string& mode) {
-        this->guidance_mode_ = mode;
-    });
+    DataStore::Instance().subscribe<std::string>("guidance/target_mode",
+                                                 [this](const std::string& mode) { this->guidance_mode_ = mode; });
 
-    DataStore::Instance().subscribe<common::Quaternion>("guidance/target_quaternion", [this](const common::Quaternion& q) {
-        this->target_q_ = q;
-    });
+    DataStore::Instance().subscribe<common::Quaternion>("guidance/target_quaternion",
+                                                        [this](const common::Quaternion& q) { this->target_q_ = q; });
 }
 
-common::Vector3 FlightSoftware::step(const common::SensorData& sensors, 
-                                     const std::vector<std::vector<uint8_t>>& raw_commands,
-                                     double dt) {
-    if (dt <= 0) return common::Vector3::Zero(); 
+common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
+                                     const std::vector<std::vector<uint8_t>>& raw_commands, double dt) {
+    if (dt <= 0) return common::Vector3::Zero();
 
     // 1. Process Commands
     for (const auto& raw_cmd : raw_commands) {
@@ -80,23 +78,22 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
     if (mode == core::MissionMode::SAFE) {
         if (bdot_controller_) {
             torque_cmd = bdot_controller_->update(sensors, state_est, target, dt);
-            // In B-Dot mode, torque = dipole cross B if Bdot returns dipole, 
+            // In B-Dot mode, torque = dipole cross B if Bdot returns dipole,
             // but our Bdot implementation returns Torque for simplicity in this sim.
             // If Bdot returns dipole: torque_cmd = torque_cmd.cross(sensors.mag_body);
         }
     } else if (mode == core::MissionMode::NOMINAL) {
         // Guidance
         if (guidance_mode_ == "NADIR") {
-            common::Vector3 sc_pos(1e6, 0, 0); // Mock
-            common::Vector3 sc_vel(0, 7500, 0); // Mock
+            common::Vector3 sc_pos(1e6, 0, 0);   // Mock
+            common::Vector3 sc_vel(0, 7500, 0);  // Mock
             target.q = gnc::guidance::PointingStrategies::nadirPointing(sc_pos, sc_vel);
         } else if (guidance_mode_ == "TARGET") {
             target.q = target_q_;
         } else {
-            target.q = gnc::guidance::PointingStrategies::alignAxis(
-                common::Vector3(0, 0, 1), config_.sun_inertial);
+            target.q = gnc::guidance::PointingStrategies::alignAxis(common::Vector3(0, 0, 1), config_.sun_inertial);
         }
-        target.w = common::Vector3::Zero(); // Assume static target rates for now
+        target.w = common::Vector3::Zero();  // Assume static target rates for now
 
         if (attitude_controller_) {
             torque_cmd = attitude_controller_->update(sensors, state_est, target, dt);
@@ -109,4 +106,4 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
     return torque_cmd;
 }
 
-} // namespace fsw
+}  // namespace fsw

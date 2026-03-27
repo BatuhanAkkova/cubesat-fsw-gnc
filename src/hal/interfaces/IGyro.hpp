@@ -8,10 +8,12 @@ namespace hal {
  * @brief Interface for a Gyroscope sensor.
  */
 class IGyro : public ISensor {
-public:
+   public:
     virtual ~IGyro() = default;
 
-    std::string getName() const override { return "Gyroscope"; }
+    std::string getName() const override {
+        return "Gyroscope";
+    }
 
     /**
      * @brief Read the current angular velocity from the gyro.
@@ -20,4 +22,4 @@ public:
     virtual common::Vector3 read() = 0;
 };
 
-} // namespace hal
+}  // namespace hal

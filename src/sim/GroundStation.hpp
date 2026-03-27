@@ -1,12 +1,13 @@
 #pragma once
 
+#include <map>
+#include <string>
+#include <vector>
+
+#include "common/types.hpp"
+#include "fsw/fdir/FDIRConfig.hpp"
 #include "fsw/telemetry/CCSDS.hpp"
 #include "fsw/telemetry/CommandProtocol.hpp"
-#include "fsw/fdir/FDIRConfig.hpp"
-#include "common/types.hpp"
-#include <vector>
-#include <string>
-#include <map>
 
 namespace sim {
 
@@ -15,7 +16,7 @@ namespace sim {
  * Responsible for encoding commands and decoding telemetry.
  */
 class GroundStation {
-public:
+   public:
     struct AttitudeTelemetry {
         common::Quaternion q;
         common::Vector3 omega;
@@ -34,7 +35,7 @@ public:
     GroundStation();
 
     // --- Command Encoding ---
-    
+
     /**
      * @brief Create a Slew to Nadir command packet.
      */
@@ -64,11 +65,17 @@ public:
     void processTelemetry(const std::vector<std::vector<uint8_t>>& packets);
 
     // --- Accessors ---
-    const AttitudeTelemetry& getLatestAttitude() const { return last_attitude_; }
-    const OrbitTelemetry& getLatestOrbit() const { return last_orbit_; }
-    const std::map<std::string, HealthTelemetry>& getHealthMap() const { return health_map_; }
+    const AttitudeTelemetry& getLatestAttitude() const {
+        return last_attitude_;
+    }
+    const OrbitTelemetry& getLatestOrbit() const {
+        return last_orbit_;
+    }
+    const std::map<std::string, HealthTelemetry>& getHealthMap() const {
+        return health_map_;
+    }
 
-private:
+   private:
     /**
      * @brief Helper to initialize a CCSDS command header.
      */
@@ -91,4 +98,4 @@ private:
     uint16_t command_sequence_count_ = 0;
 };
 
-} // namespace sim
+}  // namespace sim

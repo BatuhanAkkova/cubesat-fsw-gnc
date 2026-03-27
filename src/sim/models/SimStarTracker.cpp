@@ -1,18 +1,20 @@
 #include "SimStarTracker.hpp"
+
 #include <chrono>
 
 namespace sim {
 namespace models {
 
 SimStarTracker::SimStarTracker(const dynamics::RigidBody& body, double noise_std)
-    : body_(body), noise_std_(noise_std), 
-      gen_(std::chrono::system_clock::now().time_since_epoch().count()), 
+    : body_(body),
+      noise_std_(noise_std),
+      gen_(std::chrono::system_clock::now().time_since_epoch().count()),
       dist_(0.0, 1.0) {}
 
 common::Quaternion SimStarTracker::getOrientation() const {
     // Ground truth: Body -> Inertial
     common::Quaternion q_bi = body_.getAttitude();
-    
+
     // We want Inertial -> Body
     common::Quaternion q_ib = q_bi.inverse();
 
@@ -35,5 +37,5 @@ common::Quaternion SimStarTracker::getOrientation() const {
     return q_ib;
 }
 
-} // namespace models
-} // namespace sim
+}  // namespace models
+}  // namespace sim

@@ -1,9 +1,10 @@
 #pragma once
 
-#include "sim/Simulation.hpp"
-#include "fsw/FlightSoftware.hpp"
-#include <vector>
 #include <cmath>
+#include <vector>
+
+#include "fsw/FlightSoftware.hpp"
+#include "sim/Simulation.hpp"
 
 namespace opt {
 
@@ -11,7 +12,7 @@ namespace opt {
  * @brief Evaluates the fitness of a set of controller gains.
  */
 class FitnessEvaluator {
-public:
+   public:
     struct Results {
         double cost;
         double settling_time;
@@ -30,28 +31,23 @@ public:
         sim::Simulation::Config sim_cfg;
         // Start with a 30 degree error on X-axis
         sim_cfg.init_q = common::Quaternion(common::AngleAxis(30.0 * common::DEG2RAD, common::Vector3::UnitX()));
-        sim_cfg.init_w = common::Vector3(0.01, -0.01, 0.005); // Small initial tumble
-        
+        sim_cfg.init_w = common::Vector3(0.01, -0.01, 0.005);  // Small initial tumble
+
         sim::Simulation sim(sim_cfg);
 
         // 2. Setup FSW
         fsw::FlightSoftware::Config fsw_cfg;
         // Start in Nominal mode to test pointing immediately
-        fsw_cfg.mode_cfg.safe_to_nominal_rate_threshold = 1.0; 
-        
+        fsw_cfg.mode_cfg.safe_to_nominal_rate_threshold = 1.0;
+
         // Setup JSON config for factory to use
         fsw_cfg.full_config = {
-            {"fsw", {
-                {"controllers", {
-                    {"attitude", {
-                        {"type", "PID"},
-                        {"nominal_pid", {{"kp", gains[0]}, {"ki", gains[1]}, {"kd", gains[2]}}}
-                    }}
-                }}
-            }}
-        };
-        
-        fsw_cfg.sun_inertial = common::Vector3(1, 0, 0); // Point at X axis
+            {"fsw",
+             {{"controllers",
+               {{"attitude",
+                 {{"type", "PID"}, {"nominal_pid", {{"kp", gains[0]}, {"ki", gains[1]}, {"kd", gains[2]}}}}}}}}}};
+
+        fsw_cfg.sun_inertial = common::Vector3(1, 0, 0);  // Point at X axis
         fsw::FlightSoftware fsw(fsw_cfg);
 
         // 3. Run Simulation
@@ -59,7 +55,7 @@ public:
         double total_error_integral = 0.0;
         double total_energy = 0.0;
         double max_error = 0.0;
-        
+
         bool stable = true;
 
         for (double t = 0; t < duration; t += dt) {
@@ -73,12 +69,12 @@ public:
             common::Vector3 sun_inertial(1, 0, 0);
             double cos_theta = body_z.dot(sun_inertial);
             double error_rad = std::acos(std::clamp(cos_theta, -1.0, 1.0));
-            
+
             total_error_integral += error_rad * dt;
             total_energy += torque.squaredNorm() * dt;
-            
-            if (t > 0.1) { // Ignore initial transient for overshoot
-                 max_error = std::max(max_error, error_rad);
+
+            if (t > 0.1) {  // Ignore initial transient for overshoot
+                max_error = std::max(max_error, error_rad);
             }
 
             // Failure criteria: if error grows too large or NaN
@@ -90,7 +86,7 @@ public:
 
         Results res;
         if (!stable) {
-            res.cost = 1e12; // Massively penalized
+            res.cost = 1e12;  // Massively penalized
             return res;
         }
 
@@ -99,9 +95,9 @@ public:
         res.cost = (100.0 * total_error_integral) + (10.0 * total_energy);
         res.energy_used = total_energy;
         // ... could calculate settling time here ...
-        
+
         return res;
     }
 };
 
-} // namespace opt
+}  // namespace opt

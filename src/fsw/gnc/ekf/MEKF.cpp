@@ -1,6 +1,8 @@
 #include "MEKF.hpp"
-#include "common/logger.hpp"
+
 #include <iostream>
+
+#include "common/logger.hpp"
 
 namespace fsw {
 namespace gnc {
@@ -16,7 +18,7 @@ MEKF::MEKF() {
 void MEKF::update(const common::SensorData& sensors, double dt) {
     // 1. Prediction step with Gyro
     // Use conservative nominal Q (can be made configurable later)
-    common::Matrix6 Q = common::Matrix6::Identity() * 1e-7; 
+    common::Matrix6 Q = common::Matrix6::Identity() * 1e-7;
     predict(sensors.gyro_body, dt, Q);
 
     // 2. Correction step with Star Tracker (if valid)
@@ -38,7 +40,7 @@ void MEKF::initialize(const common::Quaternion& q0, const common::Vector3& beta0
 void MEKF::predict(const common::Vector3& gyro_meas, double dt, const common::MatrixX& Q) {
     // 1. Propagate Nominal State
     common::Vector3 omega_est = gyro_meas - beta_est_;
-    
+
     // Kinematics: q_dot = 0.5 * q * omega
     // Consistent with RigidBody for identical integration
     common::Quaternion omega_q(0, omega_est.x(), omega_est.y(), omega_est.z());
@@ -48,23 +50,21 @@ void MEKF::predict(const common::Vector3& gyro_meas, double dt, const common::Ma
     // Simple Euler integration
     q_est_.coeffs() += q_dot.coeffs() * dt;
     q_est_.normalize();
-    
+
     // 2. Propagate Covariance
     // F matrix (continuous time linearized dynamics)
     // d(delta_theta)/dt = -[omega x] * delta_theta - delta_beta
     // d(delta_beta)/dt = 0
-    
+
     common::MatrixX F(6, 6);
     F.setZero();
-    
+
     // Top-left: -[omega x]
     common::Matrix3 omega_cross;
-    omega_cross << 0, -omega_est.z(), omega_est.y(),
-                   omega_est.z(), 0, -omega_est.x(),
-                   -omega_est.y(), omega_est.x(), 0;
-                   
+    omega_cross << 0, -omega_est.z(), omega_est.y(), omega_est.z(), 0, -omega_est.x(), -omega_est.y(), omega_est.x(), 0;
+
     F.block<3, 3>(0, 0) = -omega_cross;
-    F.block<3, 3>(0, 3) = -common::Matrix3::Identity(); // Correct sign for bias error coupling
+    F.block<3, 3>(0, 3) = -common::Matrix3::Identity();  // Correct sign for bias error coupling
 
     // Discretize F -> Phi = I + F*dt
     common::MatrixX Phi = common::MatrixX::Identity(6, 6) + F * dt;
@@ -78,13 +78,13 @@ void MEKF::update_quat(const common::Quaternion& q_meas, const common::Matrix3& 
     // dq = q_meas * q_est_inv
     // Ideally dq should be close to identity
     common::Quaternion dq = q_meas * q_est_.inverse();
-    
+
     // Residual vector z = 2 * dq.vec (vector part)
     // Small angle approximation: dq = [1, 0.5*theta]
     common::Vector3 z = 2.0 * dq.vec();
-    
+
     // Ensure we take the short path (if w < 0, negate to keep close to +Identity)
-    // Note: dq.vec() sign depends on w. If dq.w() < 0, it represents same rotation but far path. 
+    // Note: dq.vec() sign depends on w. If dq.w() < 0, it represents same rotation but far path.
     // Usually q and -q are same. To treat as small error, we want w ~= 1.
     if (dq.w() < 0) {
         z = -z;
@@ -103,7 +103,7 @@ void MEKF::update_quat(const common::Quaternion& q_meas, const common::Matrix3& 
     common::MatrixX K = P_ * H.transpose() * S.inverse();
 
     // 4. Update State
-    common::VectorX dx = K * z; // 6x1 correction
+    common::VectorX dx = K * z;  // 6x1 correction
 
     common::Vector3 d_theta = dx.segment<3>(0);
     common::Vector3 d_beta = dx.segment<3>(3);
@@ -117,7 +117,7 @@ void MEKF::update_quat(const common::Quaternion& q_meas, const common::Matrix3& 
     // dq = [1, 0.5*d_theta] normalized
     common::Quaternion correction(1.0, d_theta.x() * 0.5, d_theta.y() * 0.5, d_theta.z() * 0.5);
     correction.normalize();
-    
+
     q_est_ = correction * q_est_;
     q_est_.normalize();
 
@@ -132,14 +132,14 @@ void MEKF::reset() {
     // Reset to identity attitude and zero bias
     q_est_.setIdentity();
     beta_est_.setZero();
-    
+
     // Set high initial uncertainty (conservative reset)
     P_.setIdentity(6, 6);
     P_ *= 1.0;  // 1 rad^2 for attitude error, 1 rad^2/s^2 for bias
-    
+
     common::LogWarning("[MEKF] Filter reset to initial conditions");
 }
 
-} // namespace ekf
-} // namespace gnc
-} // namespace fsw
+}  // namespace ekf
+}  // namespace gnc
+}  // namespace fsw

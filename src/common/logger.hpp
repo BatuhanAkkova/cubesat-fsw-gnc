@@ -1,13 +1,13 @@
 #pragma once
 
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include <memory>
+#include <spdlog/sinks/stdout_color_sinks.h>
+#include <spdlog/spdlog.h>
 
 namespace common {
 
 class Logger {
-public:
+   public:
     static void Init() {
         auto console = spdlog::stdout_color_mt("console");
         spdlog::set_default_logger(console);
@@ -16,24 +16,24 @@ public:
 };
 
 // Simple wrappers for now
-template<typename... Args>
-inline void LogInfo(spdlog::format_string_t<Args...> fmt, Args &&...args) {
+template <typename... Args>
+inline void LogInfo(spdlog::format_string_t<Args...> fmt, Args&&... args) {
     spdlog::info(fmt, std::forward<Args>(args)...);
 }
 
-template<typename... Args>
-inline void LogError(spdlog::format_string_t<Args...> fmt, Args &&...args) {
+template <typename... Args>
+inline void LogError(spdlog::format_string_t<Args...> fmt, Args&&... args) {
     spdlog::error(fmt, std::forward<Args>(args)...);
 }
 
-template<typename... Args>
-inline void LogWarning(spdlog::format_string_t<Args...> fmt, Args &&...args) {
+template <typename... Args>
+inline void LogWarning(spdlog::format_string_t<Args...> fmt, Args&&... args) {
     spdlog::warn(fmt, std::forward<Args>(args)...);
 }
 
-template<typename... Args>
-inline void LogDebug(spdlog::format_string_t<Args...> fmt, Args &&...args) {
+template <typename... Args>
+inline void LogDebug(spdlog::format_string_t<Args...> fmt, Args&&... args) {
     spdlog::debug(fmt, std::forward<Args>(args)...);
 }
 
-} // namespace common
+}  // namespace common

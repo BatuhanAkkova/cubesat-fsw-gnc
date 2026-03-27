@@ -13,4 +13,4 @@ struct SensorData {
     common::Vector3 sun_body;       // Sun vector in body frame
 };
 
-} // namespace common
+}  // namespace common

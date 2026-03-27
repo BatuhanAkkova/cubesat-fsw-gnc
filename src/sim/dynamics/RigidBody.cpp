@@ -1,10 +1,12 @@
 #include "RigidBody.hpp"
+
 #include "sim/engine/Integrator.hpp"
 
 namespace sim {
 namespace dynamics {
 
-RigidBody::RigidBody(const common::Matrix3& inertia, const common::Quaternion& init_att, const common::Vector3& init_omega)
+RigidBody::RigidBody(const common::Matrix3& inertia, const common::Quaternion& init_att,
+                     const common::Vector3& init_omega)
     : inertia_(inertia), inertia_inv_(inertia.inverse()) {
     state_.resize(7);
     // Eigen quaternion coeffs: (x, y, z, w)
@@ -12,15 +14,13 @@ RigidBody::RigidBody(const common::Matrix3& inertia, const common::Quaternion& i
     state_.segment<3>(4) = init_omega;
 }
 
-common::VectorX RigidBody::dynamics(double, const common::VectorX& y, 
-                                 const common::Vector3& external_torque,
-                                 const common::Vector3& internal_torque,
-                                 const common::Vector3& internal_momentum) {
+common::VectorX RigidBody::dynamics(double, const common::VectorX& y, const common::Vector3& external_torque,
+                                    const common::Vector3& internal_torque, const common::Vector3& internal_momentum) {
     // Unpack state
     common::Vector4 q_coeffs = y.segment<4>(0);
-    common::Quaternion q(q_coeffs(3), q_coeffs(0), q_coeffs(1), q_coeffs(2)); // w, x, y, z construction
-    q.normalize(); // Ensure unit quaternion
-    
+    common::Quaternion q(q_coeffs(3), q_coeffs(0), q_coeffs(1), q_coeffs(2));  // w, x, y, z construction
+    q.normalize();                                                             // Ensure unit quaternion
+
     common::Vector3 omega = y.segment<3>(4);
 
     // Attitude Kinematics: q_dot = 0.5 * q * omega_quat
@@ -42,10 +42,8 @@ common::VectorX RigidBody::dynamics(double, const common::VectorX& y,
     return dydt;
 }
 
-void RigidBody::step(double dt, 
-                  const common::Vector3& external_torque,
-                  const common::Vector3& internal_torque,
-                  const common::Vector3& internal_momentum) {
+void RigidBody::step(double dt, const common::Vector3& external_torque, const common::Vector3& internal_torque,
+                     const common::Vector3& internal_momentum) {
     auto f = [this, external_torque, internal_torque, internal_momentum](double t, const common::VectorX& y) {
         return this->dynamics(t, y, external_torque, internal_torque, internal_momentum);
     };
@@ -58,12 +56,12 @@ void RigidBody::step(double dt,
 
 common::Quaternion RigidBody::getAttitude() const {
     common::Vector4 c = state_.segment<4>(0);
-    return common::Quaternion(c(3), c(0), c(1), c(2)); // w, x, y, z
+    return common::Quaternion(c(3), c(0), c(1), c(2));  // w, x, y, z
 }
 
 common::Vector3 RigidBody::getAngularVelocity() const {
     return state_.segment<3>(4);
 }
 
-} // namespace dynamics
-} // namespace sim
+}  // namespace dynamics
+}  // namespace sim

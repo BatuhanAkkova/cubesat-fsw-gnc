@@ -1,9 +1,10 @@
 #pragma once
 
-#include "fsw/core/Command.hpp"
-#include <queue>
-#include <mutex>
 #include <memory>
+#include <mutex>
+#include <queue>
+
+#include "fsw/core/Command.hpp"
 
 namespace fsw {
 namespace core {
@@ -12,7 +13,7 @@ namespace core {
  * @brief Manager to handle receiving, queuing, and executing commands.
  */
 class CommandManager {
-public:
+   public:
     /**
      * @brief Add a command to the execution queue.
      */
@@ -29,10 +30,10 @@ public:
      */
     size_t getPendingCount();
 
-private:
+   private:
     std::queue<std::unique_ptr<Command>> command_queue_;
     std::mutex queue_mutex_;
 };
 
-} // namespace core
-} // namespace fsw
+}  // namespace core
+}  // namespace fsw

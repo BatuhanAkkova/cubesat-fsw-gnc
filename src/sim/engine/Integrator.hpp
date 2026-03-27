@@ -10,12 +10,12 @@ namespace engine {
  */
 template <typename StateType>
 class Integrator {
-public:
+   public:
     using ODE = std::function<StateType(double t, const StateType& y)>;
 
     /**
      * @brief Perform a single RK4 step.
-     * 
+     *
      * @param t Current time.
      * @param y Current state.
      * @param dt Time step.
@@ -32,5 +32,5 @@ public:
     }
 };
 
-} // namespace engine
-} // namespace sim
+}  // namespace engine
+}  // namespace sim

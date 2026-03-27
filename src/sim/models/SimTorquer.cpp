@@ -3,8 +3,7 @@
 namespace sim {
 namespace models {
 
-SimTorquer::SimTorquer(double max_dipole)
-    : max_dipole_(max_dipole), current_dipole_(common::Vector3::Zero()) {}
+SimTorquer::SimTorquer(double max_dipole) : max_dipole_(max_dipole), current_dipole_(common::Vector3::Zero()) {}
 
 void SimTorquer::setDipole(const common::Vector3& dipole_moment_Am2) {
     // Saturate the command
@@ -17,5 +16,5 @@ common::Vector3 SimTorquer::getDipole() const {
     return current_dipole_;
 }
 
-} // namespace models
-} // namespace sim
+}  // namespace models
+}  // namespace sim

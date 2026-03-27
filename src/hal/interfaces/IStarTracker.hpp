@@ -6,21 +6,23 @@ namespace hal {
 
 /**
  * @brief Interface for a Star Tracker sensor.
- * 
+ *
  * Provides orientation measurement (Inertial -> Body).
  */
 class IStarTracker : public ISensor {
-public:
+   public:
     virtual ~IStarTracker() = default;
 
-    std::string getName() const override { return "StarTracker"; }
+    std::string getName() const override {
+        return "StarTracker";
+    }
 
     /**
      * @brief Get the measured attitude quaternion (Inertial -> Body).
-     * 
-     * @return common::Quaternion 
+     *
+     * @return common::Quaternion
      */
     virtual common::Quaternion getOrientation() const = 0;
 };
 
-} // namespace hal
+}  // namespace hal
