@@ -1,4 +1,5 @@
 #include "opt/GeneticOptimizer.hpp"
+#include "common/logger.hpp"
 #include <chrono>
 
 namespace opt {
@@ -18,9 +19,9 @@ std::vector<double> GeneticOptimizer::optimize() {
         std::sort(population_.begin(), population_.end(), 
             [](const Individual& a, const Individual& b) { return a.cost < b.cost; });
 
-        std::cout << "Generation " << g << " | Best Cost: " << population_[0].cost 
-                  << " | Gains: [" << population_[0].genes[0] << ", " 
-                  << population_[0].genes[1] << ", " << population_[0].genes[2] << "]" << std::endl;
+        common::LogInfo("Generation {} | Best Cost: {:.4f} | Gains: [{:.2f}, {:.2f}, {:.2f}]", 
+                        g, population_[0].cost, population_[0].genes[0], 
+                        population_[0].genes[1], population_[0].genes[2]);
 
         if (g < config_.num_generations - 1) {
             evolve();

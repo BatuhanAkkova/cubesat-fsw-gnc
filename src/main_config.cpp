@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include "common/ConfigLoader.hpp"
 #include "sim/Simulation.hpp"
 #include "fsw/FlightSoftware.hpp"
@@ -20,29 +21,41 @@ int main(int argc, char* argv[]) {
         fsw::FlightSoftware flight_software(fsw_cfg);
 
         double dt = 0.1;
-        double duration = 10.0;
+        double duration = 100.0; // Increased for better professional plotting
         int steps = static_cast<int>(duration / dt);
+
+        std::ofstream csv("mission_data.csv");
+        csv << "t,qw,qx,qy,qz,wx,wy,wz,error_deg\n";
 
         common::LogInfo("Starting simulation for {} seconds", duration);
 
         for (int i = 0; i < steps; ++i) {
+            double t = i * dt;
             auto sensors = simulation.getSensors();
-            
-            // In a real system, raw_commands would come from a telemetry link
             std::vector<std::vector<uint8_t>> raw_commands; 
             
             common::Vector3 torque_cmd = flight_software.step(sensors, raw_commands, dt);
-            
             simulation.step(dt, torque_cmd);
 
-            if (i % 10 == 0) {
-                auto q = simulation.getAttitude();
-                common::LogInfo("Step {}: Attitude Q=[{:.4f}, {:.4f}, {:.4f}, {:.4f}]", 
-                         i, q.w(), q.x(), q.y(), q.z());
+            auto q = simulation.getAttitude();
+            auto w = simulation.getAngularRate();
+            
+            // Calculate pointing error (simplified)
+            common::Vector3 body_z = q * common::Vector3(0, 0, 1);
+            common::Vector3 sun_inertial(1, 0, 0);
+            double cos_theta = body_z.dot(sun_inertial);
+            double error_deg = std::acos(std::clamp(cos_theta, -1.0, 1.0)) * 57.2958;
+
+            csv << t << "," << q.w() << "," << q.x() << "," << q.y() << "," << q.z() << ","
+                << w.x() << "," << w.y() << "," << w.z() << "," << error_deg << "\n";
+
+            if (i % 100 == 0) {
+                common::LogInfo("Step {}: t={:.1f}s | Pointing Error: {:.2f} deg", i, t, error_deg);
             }
         }
 
-        common::LogInfo("Simulation completed successfully.");
+        csv.close();
+        common::LogInfo("Simulation completed successfully. Data saved to mission_data.csv");
 
     } catch (const std::exception& e) {
         common::LogError("Error: {}", e.what());

@@ -6,8 +6,7 @@
 #include <vector>
 #include <numeric>
 #include <algorithm>
-#include <iostream>
-#include <iomanip>
+#include "common/logger.hpp"
 
 namespace common {
 
@@ -51,29 +50,22 @@ public:
     }
 
     /**
-     * @brief Print all statistics to stdout.
+     * @brief Print all statistics to the log.
      */
     void printReport() const {
-        std::cout << "\n========== PROFILING REPORT ==========" << std::endl;
         if (stats_.empty()) {
             return;
         }
-        std::cout << std::left << std::setw(20) << "Section" 
-                  << std::right << std::setw(12) << "Avg(ms)" 
-                  << std::setw(12) << "Max(ms)" 
-                  << std::setw(12) << "Total(ms)" 
-                  << std::setw(10) << "Calls" << std::endl;
-        std::cout << std::string(66, '-') << std::endl;
+
+        common::LogInfo("\n========== PROFILING REPORT ==========");
+        common::LogInfo("{:<20} {:>12} {:>12} {:>12} {:>10}", "Section", "Avg(ms)", "Max(ms)", "Total(ms)", "Calls");
+        common::LogInfo("{}", std::string(66, '-'));
 
         for (auto const& [name, s] : stats_) {
-            std::cout << std::left << std::setw(20) << name 
-                      << std::right << std::fixed << std::setprecision(4) 
-                      << std::setw(12) << s.avg_time_ms() 
-                      << std::setw(12) << s.max_time_ms 
-                      << std::setw(12) << s.total_time_ms 
-                      << std::setw(10) << s.count << std::endl;
+            common::LogInfo("{:<20} {:>12.4f} {:>12.4f} {:>12.4f} {:>10}",
+                            name, s.avg_time_ms(), s.max_time_ms, s.total_time_ms, s.count);
         }
-        std::cout << "======================================\n" << std::endl;
+        common::LogInfo("======================================\n");
     }
 
     /**

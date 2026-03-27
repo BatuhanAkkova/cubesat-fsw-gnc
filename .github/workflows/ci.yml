@@ -7,7 +7,17 @@ on:
     branches: [ "main" ]
 
 jobs:
+  lint:
+    name: Formatting Check
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Run Clang-Format
+      run: |
+        find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror
+  
   build_and_test:
+    needs: lint
     name: ${{ matrix.os }} - ${{ matrix.build_type }}
     runs-on: ${{ matrix.os }}
     strategy:

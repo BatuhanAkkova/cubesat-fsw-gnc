@@ -1,4 +1,5 @@
 #include "test/MonteCarloRunner.hpp"
+#include "common/logger.hpp"
 #include <iomanip>
 #include <chrono>
 
@@ -12,7 +13,7 @@ void MonteCarloRunner::run() {
     int successes = 0;
     std::vector<MonteCarloResult> results;
 
-    std::cout << "\n=== STARTING MONTE CARLO ANALYSIS (" << config_.num_runs << " runs) ===" << std::endl;
+    common::LogInfo("\n=== STARTING MONTE CARLO ANALYSIS ({} runs) ===", config_.num_runs);
 
     for (int i = 0; i < config_.num_runs; ++i) {
         MonteCarloResult res = runSingleSimulation(i);
@@ -20,13 +21,13 @@ void MonteCarloRunner::run() {
         if (res.success) successes++;
 
         if ((i + 1) % 10 == 0) {
-            std::cout << "Progress: " << (i + 1) << "/" << config_.num_runs 
-                      << " | Current Success Rate: " << (double)successes / (i + 1) * 100.0 << "%" << std::endl;
+            common::LogInfo("Progress: {}/{} | Current Success Rate: {:.2f}%", 
+                            (i + 1), config_.num_runs, (double)successes / (i + 1) * 100.0);
         }
     }
 
-    std::cout << "\n=== MONTE CARLO RESULTS ===" << std::endl;
-    std::cout << "Overall Success Rate: " << (double)successes / config_.num_runs * 100.0 << "%" << std::endl;
+    common::LogInfo("\n=== MONTE CARLO RESULTS ===");
+    common::LogInfo("Overall Success Rate: {:.2f}%", (double)successes / config_.num_runs * 100.0);
     
     // Summary of failures (could be more detailed)
 }
