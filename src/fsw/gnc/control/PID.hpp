@@ -21,7 +21,8 @@ class PID {
         double anti_windup_limit = 1.0e12;  // I-term clamp
     };
 
-    PID(const Config& config) : config_(config), integral_(0.0), last_error_(0.0), last_output_(0.0), first_run_(true) {}
+    PID(const Config& config)
+        : config_(config), integral_(0.0), last_error_(0.0), last_output_(0.0), first_run_(true) {}
 
     /**
      * @brief Compute PID output.

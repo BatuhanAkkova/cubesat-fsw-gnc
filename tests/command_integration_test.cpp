@@ -58,15 +58,12 @@ TEST(CommandIntegrationTest, SetPidGainsCommandUpdatesController) {
 
     // Provide a minimal config to ensure AttitudeController is created
     nlohmann::json full_cfg = {
-        {"fsw", {
-            {"controllers", {
-                {"attitude", {
-                    {"type", "PID"},
-                    {"nominal_pid", {{"kp", 1.0}, {"ki", 0.0}, {"kd", 0.0}, {"limit", 1.0}, {"anti_windup_limit", 1.0}}}
-                }}
-            }}
-        }}
-    };
+        {"fsw",
+         {{"controllers",
+           {{"attitude",
+             {{"type", "PID"},
+              {"nominal_pid",
+               {{"kp", 1.0}, {"ki", 0.0}, {"kd", 0.0}, {"limit", 1.0}, {"anti_windup_limit", 1.0}}}}}}}}}};
 
     FlightSoftware::Config config;
     config.full_config = full_cfg;

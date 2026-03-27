@@ -32,9 +32,15 @@ class FlightSoftware {
     common::Vector3 step(const common::SensorData& sensors, const std::vector<std::vector<uint8_t>>& raw_commands,
                          double dt);
 
-    core::ModeManager& getModeManager() { return *mode_manager_; }
-    common::Vector3 getCommandTorque() const { return last_torque_cmd_; }
-    core::MissionMode getCurrentMode() const { return mode_manager_->getCurrentMode(); }
+    core::ModeManager& getModeManager() {
+        return *mode_manager_;
+    }
+    common::Vector3 getCommandTorque() const {
+        return last_torque_cmd_;
+    }
+    core::MissionMode getCurrentMode() const {
+        return mode_manager_->getCurrentMode();
+    }
 
     gnc::control::AttitudeController& getAttitudeController() {
         if (!attitude_controller_) {
