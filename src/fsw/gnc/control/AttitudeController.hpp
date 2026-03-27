@@ -52,7 +52,9 @@ class AttitudeController : public interfaces::IController {
         double rate_feedback_gain;  // Damping term: -k_rate * omega
 
         Config()
-            : max_torque_rate(0.5),          // 0.5 Nm/s
+            : nominal_pid({1.0, 0.01, 0.1, 1.0, 0.5}),
+              large_error_pid({0.5, 0.0, 0.2, 1.0, 0.5}),
+              max_torque_rate(0.5),          // 0.5 Nm/s
               max_angular_accel(0.1),        // 0.1 rad/s^2
               small_error_threshold(0.175),  // 10 degrees
               large_error_threshold(0.524),  // 30 degrees
@@ -65,12 +67,9 @@ class AttitudeController : public interfaces::IController {
           pid_pitch_(config.nominal_pid),
           pid_yaw_(config.nominal_pid),
           last_torque_cmd_(common::Vector3::Zero()) {
-        
         // Subscribe to gain updates
-        fsw::DataStore::Instance().subscribe<GainsPayload>("gnc/att_gains", 
-            [this](const GainsPayload& p) {
-                this->setGains(p.kp, p.ki, p.kd, p.is_nominal);
-            });
+        fsw::DataStore::Instance().subscribe<GainsPayload>(
+            "gnc/att_gains", [this](const GainsPayload& p) { this->setGains(p.kp, p.ki, p.kd, p.is_nominal); });
     }
 
     /**

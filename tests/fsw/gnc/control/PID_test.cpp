@@ -45,6 +45,7 @@ TEST(PIDTest, IntegralAction) {
     cfg.kp = 0.0;
     cfg.ki = 1.5;
     cfg.kd = 0.0;
+    cfg.limit = 10.0;
     cfg.anti_windup_limit = 10.0;
 
     PID pid(cfg);

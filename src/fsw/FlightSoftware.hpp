@@ -7,10 +7,11 @@
 #include <vector>
 
 #include "fsw/core/CommandManager.hpp"
+#include "fsw/core/DataStore.hpp"
 #include "fsw/core/ModeManager.hpp"
+#include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
-#include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
 
 namespace fsw {
@@ -31,16 +32,14 @@ class FlightSoftware {
     common::Vector3 step(const common::SensorData& sensors, const std::vector<std::vector<uint8_t>>& raw_commands,
                          double dt);
 
-    core::ModeManager& getModeManager() {
-        return *mode_manager_;
-    }
-    common::Vector3 getCommandTorque() const {
-        return last_torque_cmd_;
-    }
-    core::MissionMode getCurrentMode() const {
-        return mode_manager_->getCurrentMode();
-    }
+    core::ModeManager& getModeManager() { return *mode_manager_; }
+    common::Vector3 getCommandTorque() const { return last_torque_cmd_; }
+    core::MissionMode getCurrentMode() const { return mode_manager_->getCurrentMode(); }
+
     gnc::control::AttitudeController& getAttitudeController() {
+        if (!attitude_controller_) {
+            throw std::runtime_error("Attitude controller not initialized! Check config.");
+        }
         return *static_cast<gnc::control::AttitudeController*>(attitude_controller_.get());
     }
 
