@@ -41,6 +41,10 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
 
     DataStore::Instance().subscribe<common::Quaternion>("guidance/target_quaternion",
                                                         [this](const common::Quaternion& q) { this->target_q_ = q; });
+
+    // Initialize lock-free queue and state history
+    telemetry_queue_ = std::make_unique<core::SPSCQueue<common::State, 128>>();
+    state_history_ = std::make_unique<common::StateHistory>(1000);  // 1000 samples
 }
 
 common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
@@ -99,6 +103,10 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
             torque_cmd = attitude_controller_->update(sensors, state_est, target, dt);
         }
     }
+
+    // Update lock-free telemetry and SIMD state history
+    telemetry_queue_->push(state_est);
+    state_history_->addState(state_est);
 
     // 5. Telemetry & Cleanup
     telemetry_manager_->update(dt);

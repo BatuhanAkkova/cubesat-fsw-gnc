@@ -14,6 +14,11 @@ add_executable(test_datastore test_datastore.cpp)
 target_link_libraries(test_datastore PRIVATE fsw_lib gtest_main)
 gtest_discover_tests(test_datastore)
 
+# Performance tests (SPSC and SIMD)
+add_executable(performance_test performance_test.cpp)
+target_link_libraries(performance_test PRIVATE fsw_lib common gtest_main)
+gtest_discover_tests(performance_test)
+
 # B-Dot Test
 add_executable(bdot_test bdot_test.cpp)
 target_link_libraries(bdot_test PRIVATE sim_engine fsw_lib common gtest_main)

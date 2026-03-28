@@ -83,6 +83,9 @@ The **Mode Manager** autonomously drives the mission state machine, supporting k
 -   **FDIR (Fault Detection, Isolation, and Recovery)**: Sensor health monitoring and automatic mode switching logic.
 -   **Flight Executive**: **Task scheduling**, state machine management, and robust command parsing.
 -   **Communication**: **CCSDS Telemetry** packet encoding for attitude, orbit, and health data.
+-   **High-Performance Core**:
+    -   **Lock-Free Communication**: Single-Producer Single-Consumer (**SPSC**) message bus for ultra-low latency inter-task telemetry.
+    -   **SIMD-Optimized State Management**: Structure-of-Arrays (**SoA**) memory layout for batch state processing using Eigen vectorization.
 -   **Simulation Engine**:
     -   High-fidelity rigid body dynamics (Euler's equations) with RK4 integration.
     -   J2 Perturbation orbit propagation.
@@ -95,9 +98,9 @@ The **Mode Manager** autonomously drives the mission state machine, supporting k
 
 ```text
 ├── src/
-│   ├── common/         # Common math types, time, profiler and logging utilities
+│   ├── common/         # Math types, StateHistory (SoA), profiler and logging
 │   ├── fsw/            # Flight Software core
-│   │   ├── core/       # DataStore, ModeManager, TaskScheduler, Command Handling
+│   │   ├── core/       # DataStore, ModeManager, SPSCQueue, TaskScheduler
 │   │   ├── gnc/        # MEKF, PID, B-Dot, Pointing Strategies
 │   │   ├── fdir/       # Fault Detection and Recovery
 │   │   └── telemetry/  # CCSDS Telemetry Encoding

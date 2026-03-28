@@ -12,6 +12,8 @@
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
+#include "fsw/core/SPSCQueue.hpp"
+#include "common/StateHistory.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
 
 namespace fsw {
@@ -61,6 +63,12 @@ class FlightSoftware {
     std::string guidance_mode_ = "SUN";
     common::Quaternion target_q_ = common::Quaternion::Identity();
     common::Vector3 last_torque_cmd_ = common::Vector3::Zero();
+
+    // High-speed telemetry path (Lock-free SPSC)
+    std::unique_ptr<core::SPSCQueue<common::State, 128>> telemetry_queue_;
+
+    // SIMD-optimized state history
+    std::unique_ptr<common::StateHistory> state_history_;
 };
 
 }  // namespace fsw
