@@ -1,6 +1,4 @@
 #pragma once
-#include <Eigen/Dense>
-#include <Eigen/Geometry>
 #include <memory>
 #include <nlohmann/json.hpp>
 #include <string>
@@ -9,12 +7,16 @@
 #include "fsw/core/CommandManager.hpp"
 #include "fsw/core/DataStore.hpp"
 #include "fsw/core/ModeManager.hpp"
+#include "fsw/core/SPSCQueue.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
-#include "fsw/core/SPSCQueue.hpp"
-#include "common/StateHistory.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
+
+#include "common/StateHistory.hpp"
+
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
 
 namespace fsw {
 

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "fsw/FlightSoftware.hpp"
+
 #include "sim/Simulation.hpp"
 
 namespace opt {

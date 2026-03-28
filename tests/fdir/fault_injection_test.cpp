@@ -4,6 +4,7 @@
 #include "fsw/fdir/FDIRConfig.hpp"
 #include "fsw/fdir/FDIRManager.hpp"
 #include "fsw/gnc/ekf/MEKF.hpp"
+
 #include "sim/Simulation.hpp"
 
 using namespace fsw::fdir;

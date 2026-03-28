@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "fsw/gnc/control/WheelDesaturation.hpp"
+
 #include "sim/dynamics/Orbit.hpp"
 #include "sim/dynamics/RigidBody.hpp"
 #include "sim/models/SimMagnetometer.hpp"

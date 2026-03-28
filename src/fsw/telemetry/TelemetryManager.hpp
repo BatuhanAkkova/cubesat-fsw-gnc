@@ -3,8 +3,9 @@
 #include <mutex>
 #include <vector>
 
-#include "TelemetryService.hpp"
 #include "fsw/core/DataStore.hpp"
+
+#include "TelemetryService.hpp"
 
 namespace fsw {
 namespace telemetry {

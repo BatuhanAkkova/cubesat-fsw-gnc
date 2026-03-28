@@ -1,9 +1,11 @@
 #include <fstream>
 #include <iostream>
 
+#include "fsw/FlightSoftware.hpp"
+
 #include "common/ConfigLoader.hpp"
 #include "common/logger.hpp"
-#include "fsw/FlightSoftware.hpp"
+
 #include "sim/Simulation.hpp"
 
 int main(int argc, char* argv[]) {

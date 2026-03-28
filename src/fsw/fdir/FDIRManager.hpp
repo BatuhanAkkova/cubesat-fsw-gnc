@@ -5,10 +5,11 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "FDIRConfig.hpp"
-#include "SensorHealthMonitor.hpp"
 #include "common/logger.hpp"
 #include "common/types.hpp"
+
+#include "FDIRConfig.hpp"
+#include "SensorHealthMonitor.hpp"
 
 // Forward declarations
 namespace fsw {

@@ -3,10 +3,11 @@
 #include <functional>
 #include <memory>
 
-#include "common/logger.hpp"
-#include "common/types.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
+
+#include "common/logger.hpp"
+#include "common/types.hpp"
 
 namespace fsw {
 namespace core {

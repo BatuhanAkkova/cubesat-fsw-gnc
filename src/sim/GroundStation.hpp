@@ -4,10 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "common/types.hpp"
 #include "fsw/fdir/FDIRConfig.hpp"
 #include "fsw/telemetry/CCSDS.hpp"
 #include "fsw/telemetry/CommandProtocol.hpp"
+
+#include "common/types.hpp"
 
 namespace sim {
 

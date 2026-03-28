@@ -1,5 +1,6 @@
 #pragma once
 #include "common/types.hpp"
+
 #include "hal/interfaces/ISensor.hpp"
 
 namespace hal {

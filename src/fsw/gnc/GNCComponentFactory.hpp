@@ -4,12 +4,13 @@
 #include <nlohmann/json.hpp>
 #include <string>
 
-#include "common/logger.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
 #include "fsw/gnc/ekf/MEKF.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
+
+#include "common/logger.hpp"
 
 namespace fsw {
 namespace gnc {

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include "fsw/FlightSoftware.hpp"
+
 #include "sim/Simulation.hpp"
 
 namespace common {

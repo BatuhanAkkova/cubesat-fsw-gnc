@@ -3,8 +3,10 @@
 #include <memory>
 #include <vector>
 
-#include "common/types.hpp"
 #include "fsw/FlightSoftware.hpp"
+
+#include "common/types.hpp"
+
 #include "sim/dynamics/Orbit.hpp"
 #include "sim/dynamics/RigidBody.hpp"
 #include "sim/models/SimGyro.hpp"

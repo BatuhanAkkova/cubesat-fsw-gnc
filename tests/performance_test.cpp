@@ -1,10 +1,11 @@
+#include <chrono>
 #include <gtest/gtest.h>
+#include <numeric>
 #include <thread>
 #include <vector>
-#include <chrono>
-#include <numeric>
 
 #include "fsw/core/SPSCQueue.hpp"
+
 #include "common/StateHistory.hpp"
 
 using namespace fsw::core;
@@ -61,7 +62,7 @@ TEST(PerformanceTest, SPSCQueueLatency) {
 TEST(PerformanceTest, StateHistorySIMD) {
     const size_t n_samples = 10000;
     StateHistory history(n_samples);
-    
+
     // Fill with dummy data
     for (size_t i = 0; i < n_samples; ++i) {
         State s;
@@ -76,14 +77,15 @@ TEST(PerformanceTest, StateHistorySIMD) {
     auto start = std::chrono::high_resolution_clock::now();
     double m = history.mean(StateHistory::POSX);
     auto end = std::chrono::high_resolution_clock::now();
-    
+
     auto duration = std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count();
-    
+
     EXPECT_NEAR(m, (n_samples - 1) / 2.0, 1e-7);
-    std::cout << "[ INFO ] StateHistory SIMD mean calculation for " << n_samples << " samples: " << duration << " ns" << std::endl;
+    std::cout << "[ INFO ] StateHistory SIMD mean calculation for " << n_samples << " samples: " << duration << " ns"
+              << std::endl;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }

@@ -2,9 +2,10 @@
 #include <iomanip>
 #include <iostream>
 
-#include "common/types.hpp"
 #include "fsw/telemetry/CCSDS.hpp"
 #include "fsw/telemetry/TelemetryService.hpp"
+
+#include "common/types.hpp"
 
 using namespace fsw::telemetry;
 

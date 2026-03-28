@@ -2,10 +2,11 @@
 
 #include <cmath>
 
-#include "common/types.hpp"
 #include "fsw/core/DataStore.hpp"
 #include "fsw/gnc/control/PID.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
+
+#include "common/types.hpp"
 
 namespace fsw {
 namespace gnc {

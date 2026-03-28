@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "common/types.hpp"
 #include "fsw/telemetry/TelemetryService.hpp"
+
+#include "common/types.hpp"
+
 #include "sim/GroundStation.hpp"
 
 using namespace sim;

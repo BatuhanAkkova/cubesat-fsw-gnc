@@ -1,8 +1,9 @@
 #pragma once
 
+#include <string>
+
 #include <Eigen/Dense>
 #include <Eigen/Geometry>
-#include <string>
 
 namespace common {
 

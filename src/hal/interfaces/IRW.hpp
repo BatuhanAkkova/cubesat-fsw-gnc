@@ -2,6 +2,7 @@
 #include <string>
 
 #include "common/types.hpp"
+
 #include "hal/interfaces/IActuator.hpp"
 
 namespace hal {

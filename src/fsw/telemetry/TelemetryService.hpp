@@ -3,9 +3,11 @@
 #include <string>
 #include <vector>
 
-#include "CCSDS.hpp"
-#include "common/types.hpp"
 #include "fsw/fdir/FDIRConfig.hpp"
+
+#include "common/types.hpp"
+
+#include "CCSDS.hpp"
 
 namespace fsw {
 namespace telemetry {

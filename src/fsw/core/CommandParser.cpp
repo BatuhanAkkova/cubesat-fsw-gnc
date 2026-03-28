@@ -1,11 +1,12 @@
 #include "fsw/core/CommandParser.hpp"
 
-#include "common/logger.hpp"
 #include "fsw/core/commands/SetPidGainsCommand.hpp"
 #include "fsw/core/commands/SlewToNadirCommand.hpp"
 #include "fsw/core/commands/SlewToTargetCommand.hpp"
 #include "fsw/telemetry/CommandParameter.hpp"
 #include "fsw/telemetry/CommandProtocol.hpp"
+
+#include "common/logger.hpp"
 
 namespace fsw {
 namespace core {

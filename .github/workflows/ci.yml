@@ -12,9 +12,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-    - name: Run Clang-Format
+    - name: Run Clang-Format Check
       run: |
-        find src tests -name "*.cpp" -o -name "*.hpp" | xargs clang-format --dry-run --Werror
+        chmod +x ./scripts/format.sh
+        find . -type f \( -name "*.cpp" -o -name "*.hpp" -o -name "*.h" -o -name "*.cc" -o -name "*.c" \) \
+               -not -path "*/build/*" \
+               -not -path "*/.git/*" \
+               -exec clang-format --dry-run --Werror {} +
   
   build_and_test:
     needs: lint

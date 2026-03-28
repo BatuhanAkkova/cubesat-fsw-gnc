@@ -5,6 +5,7 @@
 
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
+
 #include "sim/dynamics/RigidBody.hpp"
 #include "sim/models/SimRW.hpp"
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "common/logger.hpp"
 #include "fsw/core/Command.hpp"
 #include "fsw/core/DataStore.hpp"
+
+#include "common/logger.hpp"
 
 namespace fsw {
 namespace core {

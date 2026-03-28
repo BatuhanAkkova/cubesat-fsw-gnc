@@ -1,9 +1,10 @@
 #pragma once
 
-#include <Eigen/Dense>
 #include <vector>
 
 #include "common/types.hpp"
+
+#include <Eigen/Dense>
 
 namespace common {
 
@@ -17,13 +18,7 @@ namespace common {
  */
 class StateHistory {
    public:
-    enum Component : int {
-        QW = 0, QX, QY, QZ,
-        WX, WY, WZ,
-        POSX, POSY, POSZ,
-        VELX, VELY, VELZ,
-        NUM_COMPONENTS = 13
-    };
+    enum Component : int { QW = 0, QX, QY, QZ, WX, WY, WZ, POSX, POSY, POSZ, VELX, VELY, VELZ, NUM_COMPONENTS = 13 };
 
     explicit StateHistory(size_t max_size) : max_size_(max_size), current_size_(0), head_(0) {
         // Pre-allocate matrix (Rows = Max History, Cols = 13 components)
@@ -78,13 +73,15 @@ class StateHistory {
         return std::sqrt((slice.array() - m).square().sum() / (current_size_ - 1));
     }
 
-    size_t size() const { return current_size_; }
+    size_t size() const {
+        return current_size_;
+    }
 
    private:
     size_t max_size_;
     size_t current_size_;
     size_t head_;
-    
+
     // Rows = Time index, Cols = Component index
     // ColMajor storage: Each column is contiguous = SoA layout!
     Eigen::Matrix<double, Eigen::Dynamic, NUM_COMPONENTS, Eigen::ColMajor> data_;

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "common/types.hpp"
+
 #include "hal/interfaces/IRW.hpp"
 #include "hal/interfaces/ITorquer.hpp"
 

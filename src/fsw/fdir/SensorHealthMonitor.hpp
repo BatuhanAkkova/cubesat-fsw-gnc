@@ -4,9 +4,10 @@
 #include <functional>
 #include <string>
 
-#include "FDIRConfig.hpp"
 #include "common/logger.hpp"
 #include "common/types.hpp"
+
+#include "FDIRConfig.hpp"
 
 namespace fsw {
 namespace fdir {

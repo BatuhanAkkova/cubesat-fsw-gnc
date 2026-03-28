@@ -1,7 +1,8 @@
 #pragma once
 
-#include "common/types.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
+
+#include "common/types.hpp"
 
 namespace fsw {
 namespace gnc {

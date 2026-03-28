@@ -2,13 +2,15 @@
 #include <iomanip>
 #include <iostream>
 
-#include "common/DataLogger.hpp"
-#include "common/Profiler.hpp"
 #include "fsw/core/ModeManager.hpp"
 #include "fsw/core/TaskScheduler.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
 #include "fsw/gnc/control/Bdot.hpp"
 #include "fsw/gnc/guidance/PointingStrategies.hpp"
+
+#include "common/DataLogger.hpp"
+#include "common/Profiler.hpp"
+
 #include "sim/dynamics/Orbit.hpp"
 #include "sim/dynamics/RigidBody.hpp"
 #include "sim/models/SimRW.hpp"
