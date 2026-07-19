@@ -13,6 +13,9 @@ FDIRManager::FDIRManager() {
     critical_sensors_.insert("gyro");
     critical_sensors_.insert("gyro_primary");
     critical_sensors_.insert("gyro_backup");
+
+    // Default to 4 reaction wheels
+    wheel_monitors_.resize(4);
 }
 
 void FDIRManager::registerRedundantPair(const std::string& group_name, const std::string& primary_name,
@@ -229,6 +232,105 @@ void FDIRManager::executeResponseActions(const std::string& sensor_name, HealthS
 
 bool FDIRManager::isCriticalSensor(const std::string& sensor_name) const {
     return critical_sensors_.find(sensor_name) != critical_sensors_.end();
+}
+
+void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques, double dt, double current_time) {
+    if (wheel_monitors_.size() < speeds.size()) {
+        wheel_monitors_.resize(speeds.size());
+    }
+
+    int failed_count_before = getFailedWheelCount();
+
+    for (size_t i = 0; i < speeds.size(); ++i) {
+        auto& wm = wheel_monitors_[i];
+        
+        // Estimate acceleration
+        double delta_omega = speeds[i] - wm.last_speed;
+        double accel = delta_omega / dt;
+        wm.last_speed = speeds[i];
+
+        // 1. Saturation detection
+        // In our redundant system, max speed is around 100.0 rad/s
+        double max_speed_threshold = 95.0;
+        if (std::abs(speeds[i]) >= max_speed_threshold) {
+            if (wm.status != HealthStatus::FAILED) {
+                wm.status = HealthStatus::FAILED;
+                common::LogWarning("[FDIR] Wheel {} detected as SATURATED (speed={:.2f} rad/s)", i, speeds[i]);
+            }
+            continue;
+        }
+
+        // 2. Stuck detection
+        // If we command torque but wheel speed does not change
+        double J_wheel = 0.001; // assumed wheel inertia
+        double friction_coeff = 0.0001; // assumed wheel friction coefficient
+        double expected_torque = commanded_torques[i] - friction_coeff * speeds[i];
+        if (std::abs(expected_torque) > 2e-3) {
+            double expected_accel = expected_torque / J_wheel;
+            // If actual accel is near zero despite commanded torque
+            if (std::abs(accel) < 0.05 * std::abs(expected_accel)) {
+                wm.stuck_count++;
+                if (wm.stuck_count >= 10) { // 1.0 seconds at 10Hz
+                    if (wm.status != HealthStatus::FAILED) {
+                        wm.status = HealthStatus::FAILED;
+                        common::LogError("[FDIR] Wheel {} detected as STUCK (speed={:.2f} rad/s, command={:.3e} Nm)", i, speeds[i], commanded_torques[i]);
+                    }
+                }
+            } else {
+                wm.stuck_count = 0;
+            }
+
+            // 3. Degraded torque detection
+            // If actual accel is significantly less than expected (efficiency < 0.5)
+            // but not completely stuck
+            if (std::abs(accel) > 0.05 * std::abs(expected_accel) && std::abs(accel) < 0.5 * std::abs(expected_accel)) {
+                wm.degraded_count++;
+                if (wm.degraded_count >= 15) {
+                    if (wm.status == HealthStatus::HEALTHY) {
+                        wm.status = HealthStatus::DEGRADED;
+                        common::LogWarning("[FDIR] Wheel {} detected as DEGRADED torque (accel ratio = {:.2f})", i, std::abs(accel / expected_accel));
+                    }
+                }
+            } else {
+                wm.degraded_count = 0;
+            }
+        } else {
+            wm.stuck_count = 0;
+            wm.degraded_count = 0;
+        }
+    }
+
+    int failed_count_after = getFailedWheelCount();
+
+    // Trigger state machine mode changes if failure count increased
+    if (failed_count_after != failed_count_before) {
+        if (auto_mode_transition_ && mode_manager_) {
+            if (failed_count_after == 1) {
+                common::LogWarning("[FDIR] Transitioning to DEGRADED mode due to 1 reaction wheel failure.");
+                mode_manager_->forceModeChange(core::MissionMode::DEGRADED, "FDIR: 1 reaction wheel failure detected");
+            } else if (failed_count_after >= 2) {
+                common::LogError("[FDIR] Forcing transition to SAFE mode due to {} reaction wheel failures.", failed_count_after);
+                mode_manager_->forceModeChange(core::MissionMode::SAFE, "FDIR: Multiple reaction wheel failures detected");
+            }
+        }
+    }
+}
+
+HealthStatus FDIRManager::getWheelStatus(size_t index) const {
+    if (index < wheel_monitors_.size()) {
+        return wheel_monitors_[index].status;
+    }
+    return HealthStatus::FAILED;
+}
+
+int FDIRManager::getFailedWheelCount() const {
+    int count = 0;
+    for (const auto& wm : wheel_monitors_) {
+        if (wm.status == HealthStatus::FAILED) {
+            count++;
+        }
+    }
+    return count;
 }
 
 }  // namespace fdir

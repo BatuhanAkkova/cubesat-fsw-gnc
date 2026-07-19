@@ -158,6 +158,25 @@ class FDIRManager {
      */
     std::string getActiveSensor(const std::string& group_name) const;
 
+    /**
+     * @brief Update reaction wheel monitoring
+     * @param speeds Current measured speed of wheels [rad/s]
+     * @param commanded_torques Torques commanded in the previous step [Nm]
+     * @param dt Sampling period [s]
+     * @param current_time Mission time [s]
+     */
+    void updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques, double dt, double current_time);
+
+    /**
+     * @brief Get health status of a reaction wheel
+     */
+    HealthStatus getWheelStatus(size_t index) const;
+
+    /**
+     * @brief Get count of failed wheels
+     */
+    int getFailedWheelCount() const;
+
    private:
     /**
      * @brief Handle sensor status change events
@@ -186,6 +205,15 @@ class FDIRManager {
     };
     std::unordered_map<std::string, RedundancyGroup> redundancy_groups_;
     std::unordered_map<std::string, std::string> sensor_to_group_;
+
+    // Reaction wheel monitoring structures
+    struct WheelHealthData {
+        double last_speed = 0.0;
+        int stuck_count = 0;
+        int degraded_count = 0;
+        HealthStatus status = HealthStatus::HEALTHY;
+    };
+    std::vector<WheelHealthData> wheel_monitors_;
 
     // External component references
     core::ModeManager* mode_manager_ = nullptr;

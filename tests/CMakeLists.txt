@@ -90,6 +90,13 @@ add_executable(fault_injection_test fdir/fault_injection_test.cpp)
 target_link_libraries(fault_injection_test PRIVATE fsw_lib sim_engine common gtest_main)
 gtest_discover_tests(fault_injection_test)
 
+add_executable(fdir_rw_reconfiguration_test fdir/fdir_rw_reconfiguration_test.cpp)
+target_link_libraries(fdir_rw_reconfiguration_test PRIVATE fsw_lib sim_engine common gtest_main)
+gtest_discover_tests(fdir_rw_reconfiguration_test)
+
+add_executable(run_fdir_demo fdir/run_fdir_demo.cpp)
+target_link_libraries(run_fdir_demo PRIVATE fsw_lib sim_engine common)
+
 # Controller Gain Test
 add_executable(controller_gain_test controller_gain_test.cpp)
 target_link_libraries(controller_gain_test PRIVATE optimization mc_runner fsw_lib sim_engine common gtest_main)

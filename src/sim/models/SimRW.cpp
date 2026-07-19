@@ -33,12 +33,13 @@ void SimRW::setSpeed(double speed_rad_s) {
 }
 
 double SimRW::step(double dt) {
-    // Simple Euler integration for wheel speed
-    // J * dw/dt = T_motor - T_friction
-    // T_friction assumption: proportional to speed (viscous)
     if (is_dead_) {
         commanded_torque_ = 0.0;
-        // For "dead" assume motor is disconnected and friction is minimal or handled below.
+    }
+
+    if (fault_type_ == RWFaultType::STUCK) {
+        current_speed_ = stuck_speed_;
+        return 0.0; // No reaction torque on body when stuck
     }
 
     // Apply efficiency to the commanded torque
@@ -51,12 +52,21 @@ double SimRW::step(double dt) {
     // Check momentum saturation (speed limit)
     // If at max speed and trying to accelerate further, clamp torque
     double current_momentum = std::abs(getAngularMomentum());
-    if (current_momentum >= config_.max_momentum) {
-        // If speed is + and torque is +, clamp
+    if (current_momentum >= config_.max_momentum || fault_type_ == RWFaultType::SATURATED) {
+        // Force speed to max speed if injected saturated fault
+        if (fault_type_ == RWFaultType::SATURATED) {
+            double max_speed = config_.max_momentum / config_.inertia;
+            if (current_speed_ >= 0.0) {
+                current_speed_ = max_speed;
+            } else {
+                current_speed_ = -max_speed;
+            }
+        }
+        // Clamping torque if accelerating in the saturated direction
         if (current_speed_ > 0 && net_torque > 0) {
-            net_torque = 0;
+            net_torque = 0.0;
         } else if (current_speed_ < 0 && net_torque < 0) {
-            net_torque = 0;
+            net_torque = 0.0;
         }
     }
 

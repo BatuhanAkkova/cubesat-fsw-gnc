@@ -67,6 +67,13 @@ The **Mode Manager** autonomously drives the mission state machine, supporting k
 3.  **Nadir Pointing / Science**: High-precision target tracking in **SCIENCE Mode**.
 4.  **Fault Recovery**: Autonomous transition to **SAFE mode** upon fault detection and subsequent **Recovery**.
 
+### 5. Actuator FDIR & Control Reconfiguration
+![Actuator Fault Recovery](docs/fdir_recovery_demo.png)
+**Redundant Allocation & Active Disturbance Rejection**:
+- **Pyramid Configuration**: 4-wheel tetrahedral array provides redundancy.
+- **Online Reallocation**: The control allocator uses a dynamic right pseudo-inverse ($u = - A^\dagger \tau$) and zeroes out columns corresponding to failed wheels to reconfigure the control space.
+- **Fault Recovery demonstration**: A stuck wheel fault (injected on Wheel 0 at $t = 30$s) is detected by the FDIR monitor within 1.0 second. The control allocator reconfigures online, FSW transitions to **DEGRADED Mode**, and the spacecraft successfully recovers pointing tracking using only the remaining 3 healthy wheels (pointing error returns to $<0.9^\circ$).
+
 **Mission Statistics (1 Hour Run)**:
 - **Duration**: 60 minutes
 - **Data Collected**: >10 units

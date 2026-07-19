@@ -9,6 +9,8 @@
 #include "fsw/core/ModeManager.hpp"
 #include "fsw/core/SPSCQueue.hpp"
 #include "fsw/gnc/control/AttitudeController.hpp"
+#include "fsw/gnc/control/ControlAllocator.hpp"
+#include "fsw/fdir/FDIRManager.hpp"
 #include "fsw/gnc/interfaces/IController.hpp"
 #include "fsw/gnc/interfaces/IEstimator.hpp"
 #include "fsw/telemetry/TelemetryManager.hpp"
@@ -53,6 +55,14 @@ class FlightSoftware {
         return *static_cast<gnc::control::AttitudeController*>(attitude_controller_.get());
     }
 
+    std::vector<double> getRWTorqueCommands() const {
+        return last_rw_torque_cmds_;
+    }
+
+    fdir::FDIRManager& getFDIRManager() {
+        return *fdir_manager_;
+    }
+
    private:
     Config config_;
     std::unique_ptr<core::ModeManager> mode_manager_;
@@ -61,10 +71,14 @@ class FlightSoftware {
     std::unique_ptr<gnc::interfaces::IController> bdot_controller_;
     std::unique_ptr<telemetry::TelemetryManager> telemetry_manager_;
     std::unique_ptr<core::CommandManager> command_manager_;
+    std::unique_ptr<fdir::FDIRManager> fdir_manager_;
+    std::unique_ptr<gnc::control::ControlAllocator> control_allocator_;
 
     std::string guidance_mode_ = "SUN";
     common::Quaternion target_q_ = common::Quaternion::Identity();
     common::Vector3 last_torque_cmd_ = common::Vector3::Zero();
+    std::vector<double> last_rw_torque_cmds_;
+    double accumulated_time_ = 0.0;
 
     // High-speed telemetry path (Lock-free SPSC)
     std::unique_ptr<core::SPSCQueue<common::State, 128>> telemetry_queue_;

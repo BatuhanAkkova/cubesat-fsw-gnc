@@ -59,6 +59,8 @@ class GNCComponentFactory {
                 att_cfg.nominal_pid.kp = config["nominal_pid"]["kp"];
                 att_cfg.nominal_pid.ki = config["nominal_pid"]["ki"];
                 att_cfg.nominal_pid.kd = config["nominal_pid"]["kd"];
+                att_cfg.nominal_pid.limit = config["nominal_pid"].value("limit", 1.0);
+                att_cfg.nominal_pid.anti_windup_limit = config["nominal_pid"].value("anti_windup_limit", 0.5);
             }
             return std::make_unique<control::AttitudeController>(att_cfg);
         } else if (type == "Bdot") {

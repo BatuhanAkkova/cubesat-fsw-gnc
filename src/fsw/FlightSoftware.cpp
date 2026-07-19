@@ -12,6 +12,10 @@ namespace fsw {
 
 FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
     mode_manager_ = std::make_unique<core::ModeManager>(config.mode_cfg);
+    fdir_manager_ = std::make_unique<fdir::FDIRManager>();
+    fdir_manager_->setModeManager(mode_manager_.get());
+    control_allocator_ = std::make_unique<gnc::control::ControlAllocator>();
+    last_rw_torque_cmds_.assign(4, 0.0);
 
     // Initialize GNC components via Factory
     if (config.full_config.contains("fsw")) {
@@ -19,6 +23,12 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
 
         if (fsw_json.contains("estimator")) {
             estimator_ = gnc::GNCComponentFactory::createEstimator(fsw_json["estimator"]);
+            
+            // Link MEKF with FDIR manager if applicable
+            auto* mekf_ptr = dynamic_cast<gnc::ekf::MEKF*>(estimator_.get());
+            if (mekf_ptr) {
+                fdir_manager_->setMEKF(mekf_ptr);
+            }
         }
 
         if (fsw_json.contains("controllers")) {
@@ -40,7 +50,7 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
                                                  [this](const std::string& mode) { this->guidance_mode_ = mode; });
 
     DataStore::Instance().subscribe<common::Quaternion>("guidance/target_quaternion",
-                                                        [this](const common::Quaternion& q) { this->target_q_ = q; });
+                                                         [this](const common::Quaternion& q) { this->target_q_ = q; });
 
     // Initialize lock-free queue and state history
     telemetry_queue_ = std::make_unique<core::SPSCQueue<common::State, 128>>();
@@ -50,6 +60,9 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
 common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
                                      const std::vector<std::vector<uint8_t>>& raw_commands, double dt) {
     if (dt <= 0) return common::Vector3::Zero();
+
+    // Update accumulated time
+    accumulated_time_ += dt;
 
     // 1. Process Commands
     for (const auto& raw_cmd : raw_commands) {
@@ -70,11 +83,23 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
         state_est.w = sensors.gyro_body;
     }
 
-    // 3. Mode Management
+    // 3. Actuator FDIR & Control Allocation Configuration
+    if (sensors.rw_speeds.size() == 4) {
+        // Run reaction wheel FDIR using current speeds and previously commanded torques
+        fdir_manager_->updateWheels(sensors.rw_speeds, last_rw_torque_cmds_, dt, accumulated_time_);
+
+        // Update allocator healthy flags from FDIR status
+        for (size_t i = 0; i < 4; ++i) {
+            bool healthy = (fdir_manager_->getWheelStatus(i) != fdir::HealthStatus::FAILED);
+            control_allocator_->setWheelHealth(i, healthy);
+        }
+    }
+
+    // 4. Mode Management
     mode_manager_->update(state_est.w, dt);
     core::MissionMode mode = mode_manager_->getCurrentMode();
 
-    // 4. Guidance & Control
+    // 5. Guidance & Control
     common::Vector3 torque_cmd = common::Vector3::Zero();
     common::GuidanceTarget target;
     target.mode = guidance_mode_;
@@ -82,12 +107,11 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
     if (mode == core::MissionMode::SAFE) {
         if (bdot_controller_) {
             torque_cmd = bdot_controller_->update(sensors, state_est, target, dt);
-            // In B-Dot mode, torque = dipole cross B if Bdot returns dipole,
-            // but our Bdot implementation returns Torque for simplicity in this sim.
-            // If Bdot returns dipole: torque_cmd = torque_cmd.cross(sensors.mag_body);
         }
-    } else if (mode == core::MissionMode::NOMINAL) {
-        // Guidance
+        // In SAFE mode, command reaction wheels to 0
+        last_rw_torque_cmds_.assign(4, 0.0);
+    } else {
+        // Pointing control (NOMINAL, DEGRADED, SCIENCE, DOWNLINK)
         if (guidance_mode_ == "NADIR") {
             common::Vector3 sc_pos(1e6, 0, 0);   // Mock
             common::Vector3 sc_vel(0, 7500, 0);  // Mock
@@ -97,10 +121,28 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
         } else {
             target.q = gnc::guidance::PointingStrategies::alignAxis(common::Vector3(0, 0, 1), config_.sun_inertial);
         }
-        target.w = common::Vector3::Zero();  // Assume static target rates for now
+        target.w = common::Vector3::Zero();
 
         if (attitude_controller_) {
             torque_cmd = attitude_controller_->update(sensors, state_est, target, dt);
+        }
+
+        // Run control allocation if using redundant reaction wheels
+        if (sensors.rw_speeds.size() == 4) {
+            std::vector<double> allocated_torques;
+            bool success = control_allocator_->allocate(torque_cmd, allocated_torques);
+            if (success) {
+                last_rw_torque_cmds_ = allocated_torques;
+            } else {
+                // If allocation fails (det < threshold because too many failed wheels), force SAFE mode
+                common::LogError("[FSW] Allocation failed. Forcing transition to SAFE mode.");
+                mode_manager_->forceModeChange(core::MissionMode::SAFE, "FDIR: Actuator allocation failure");
+                last_rw_torque_cmds_.assign(4, 0.0);
+                torque_cmd = common::Vector3::Zero();
+            }
+        } else {
+            // Direct 3-axis fallback for backwards compatibility
+            last_rw_torque_cmds_.clear();
         }
     }
 
@@ -108,7 +150,7 @@ common::Vector3 FlightSoftware::step(const common::SensorData& sensors,
     telemetry_queue_->push(state_est);
     state_history_->addState(state_est);
 
-    // 5. Telemetry & Cleanup
+    // 6. Telemetry & Cleanup
     telemetry_manager_->update(dt);
     last_torque_cmd_ = torque_cmd;
     return torque_cmd;
