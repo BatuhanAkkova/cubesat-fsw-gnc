@@ -23,7 +23,7 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
 
         if (fsw_json.contains("estimator")) {
             estimator_ = gnc::GNCComponentFactory::createEstimator(fsw_json["estimator"]);
-            
+
             // Link MEKF with FDIR manager if applicable
             auto* mekf_ptr = dynamic_cast<gnc::ekf::MEKF*>(estimator_.get());
             if (mekf_ptr) {
@@ -50,7 +50,7 @@ FlightSoftware::FlightSoftware(const Config& config) : config_(config) {
                                                  [this](const std::string& mode) { this->guidance_mode_ = mode; });
 
     DataStore::Instance().subscribe<common::Quaternion>("guidance/target_quaternion",
-                                                         [this](const common::Quaternion& q) { this->target_q_ = q; });
+                                                        [this](const common::Quaternion& q) { this->target_q_ = q; });
 
     // Initialize lock-free queue and state history
     telemetry_queue_ = std::make_unique<core::SPSCQueue<common::State, 128>>();

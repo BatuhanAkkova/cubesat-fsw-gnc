@@ -23,8 +23,8 @@ int main() {
 
     // 1. Setup Simulation Environment
     // Spacecraft Inertia
-    Matrix3 inertia = Matrix3::Identity() * 0.1; // 0.1 kg*m^2
-    
+    Matrix3 inertia = Matrix3::Identity() * 0.1;  // 0.1 kg*m^2
+
     // Initial state: Stationary at rest, identity attitude
     Quaternion q_init(1.0, 0.0, 0.0, 0.0);
     Vector3 w_init(0.0, 0.0, 0.0);
@@ -33,9 +33,9 @@ int main() {
     // Redundant reaction wheel config (4 wheels)
     std::vector<std::unique_ptr<SimRW>> wheels;
     SimRW::Config rw_cfg;
-    rw_cfg.inertia = 0.001;       // 0.001 kg*m^2
-    rw_cfg.max_torque = 0.05;     // 0.05 Nm
-    rw_cfg.max_momentum = 0.1;     // 0.1 Nms
+    rw_cfg.inertia = 0.001;     // 0.001 kg*m^2
+    rw_cfg.max_torque = 0.05;   // 0.05 Nm
+    rw_cfg.max_momentum = 0.1;  // 0.1 Nms
     rw_cfg.friction_coeff = 0.0001;
     rw_cfg.initial_speed = 0.0;
 
@@ -46,9 +46,9 @@ int main() {
     // 2. Setup Flight Software Configuration
     FlightSoftware::Config fsw_cfg;
     fsw_cfg.mode_cfg.safe_to_nominal_rate_threshold = 0.02;
-    fsw_cfg.mode_cfg.nominal_to_safe_rate_threshold = 1.5; // Allow smooth slew without SAFE mode trigger
+    fsw_cfg.mode_cfg.nominal_to_safe_rate_threshold = 1.5;  // Allow smooth slew without SAFE mode trigger
     fsw_cfg.mode_cfg.min_time_in_mode = 1.0;
-    fsw_cfg.sun_inertial = Vector3(1.0, 0.0, 0.0); // Sun vector along +X
+    fsw_cfg.sun_inertial = Vector3(1.0, 0.0, 0.0);  // Sun vector along +X
 
     // Build configuration JSON to initialize PID Attitude Controller
     nlohmann::json fsw_json;
@@ -64,10 +64,10 @@ int main() {
 
     // Initial state setup: NOMINAL mode, Sun pointing target
     fsw.getModeManager().forceModeChange(MissionMode::NOMINAL, "Demo Start");
-    
+
     // 3. Main Simulation Loop
-    double dt = 0.1; // 10Hz
-    double duration = 120.0; // 120 seconds
+    double dt = 0.1;          // 10Hz
+    double duration = 120.0;  // 120 seconds
     int total_steps = static_cast<int>(duration / dt);
 
     std::ofstream csv("fdir_demo_data.csv");
@@ -86,8 +86,8 @@ int main() {
             // Inject stuck fault on wheel 0: stuck at its current speed
             double current_speed = wheels[0]->getSpeed();
             wheels[0]->injectFault_Stuck(current_speed);
-            std::cout << "[t=" << t << "s] FAULT INJECTED: Reaction Wheel 0 is STUCK at " 
-                      << current_speed << " rad/s\n";
+            std::cout << "[t=" << t << "s] FAULT INJECTED: Reaction Wheel 0 is STUCK at " << current_speed
+                      << " rad/s\n";
         }
 
         // --- FSW Input Assembly ---
@@ -97,12 +97,8 @@ int main() {
         // sun direction in body frame
         sensors.sun_body = body->getAttitude().conjugate() * fsw_cfg.sun_inertial;
         // Wheel speeds telemetry
-        sensors.rw_speeds = {
-            wheels[0]->getSpeed(),
-            wheels[1]->getSpeed(),
-            wheels[2]->getSpeed(),
-            wheels[3]->getSpeed()
-        };
+        sensors.rw_speeds = {wheels[0]->getSpeed(), wheels[1]->getSpeed(), wheels[2]->getSpeed(),
+                             wheels[3]->getSpeed()};
         sensors.rw_torques_prev = last_cmds;
 
         // --- FSW Step ---
@@ -125,15 +121,13 @@ int main() {
         double c = 0.7071067811865475;
         double s = 0.7071067811865475;
         Eigen::MatrixXd A(3, 4);
-        A <<  c,  0.0, -c,  0.0,
-             0.0,  c,  0.0, -c,
-              s,   s,   s,   s;
+        A << c, 0.0, -c, 0.0, 0.0, c, 0.0, -c, s, s, s, s;
 
         Eigen::VectorXd u(4);
         for (int i = 0; i < 4; ++i) {
             wheels[i]->setTorqueCommand(rw_cmds[i]);
             double react_torque = wheels[i]->step(dt);
-            u(i) = react_torque; // SimRW::step returns -net_torque (reaction torque on body)
+            u(i) = react_torque;  // SimRW::step returns -net_torque (reaction torque on body)
         }
 
         // Combine wheel reaction torques and momentum into body frame
@@ -160,18 +154,16 @@ int main() {
         double cos_theta = body_z.dot(fsw_cfg.sun_inertial);
         double pointing_error = std::acos(std::clamp(cos_theta, -1.0, 1.0)) * 180.0 / PI;
 
-        csv << t << "," << pointing_error << "," << static_cast<int>(fsw.getCurrentMode())
-            << "," << wheels[0]->getSpeed() << "," << wheels[1]->getSpeed()
-            << "," << wheels[2]->getSpeed() << "," << wheels[3]->getSpeed()
-            << "," << rw_cmds[0] << "," << rw_cmds[1] << "," << rw_cmds[2] << "," << rw_cmds[3]
+        csv << t << "," << pointing_error << "," << static_cast<int>(fsw.getCurrentMode()) << ","
+            << wheels[0]->getSpeed() << "," << wheels[1]->getSpeed() << "," << wheels[2]->getSpeed() << ","
+            << wheels[3]->getSpeed() << "," << rw_cmds[0] << "," << rw_cmds[1] << "," << rw_cmds[2] << "," << rw_cmds[3]
             << "," << body->getAngularVelocity().norm() << "\n";
 
         if (step % 100 == 0) {
-            std::cout << "[t=" << std::fixed << std::setprecision(1) << t << "s] Mode=" 
-                      << ModeManager::getModeString(fsw.getCurrentMode())
+            std::cout << "[t=" << std::fixed << std::setprecision(1) << t
+                      << "s] Mode=" << ModeManager::getModeString(fsw.getCurrentMode())
                       << " | Pointing Err=" << std::setprecision(2) << pointing_error << " deg"
-                      << " | W0 Status=" << static_cast<int>(fsw.getFDIRManager().getWheelStatus(0))
-                      << std::endl;
+                      << " | W0 Status=" << static_cast<int>(fsw.getFDIRManager().getWheelStatus(0)) << std::endl;
         }
     }
 

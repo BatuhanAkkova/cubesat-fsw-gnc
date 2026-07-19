@@ -234,7 +234,8 @@ bool FDIRManager::isCriticalSensor(const std::string& sensor_name) const {
     return critical_sensors_.find(sensor_name) != critical_sensors_.end();
 }
 
-void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques, double dt, double current_time) {
+void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques,
+                               double dt, double current_time) {
     if (wheel_monitors_.size() < speeds.size()) {
         wheel_monitors_.resize(speeds.size());
     }
@@ -243,7 +244,7 @@ void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vec
 
     for (size_t i = 0; i < speeds.size(); ++i) {
         auto& wm = wheel_monitors_[i];
-        
+
         // Estimate acceleration
         double delta_omega = speeds[i] - wm.last_speed;
         double accel = delta_omega / dt;
@@ -262,18 +263,19 @@ void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vec
 
         // 2. Stuck detection
         // If we command torque but wheel speed does not change
-        double J_wheel = 0.001; // assumed wheel inertia
-        double friction_coeff = 0.0001; // assumed wheel friction coefficient
+        double J_wheel = 0.001;          // assumed wheel inertia
+        double friction_coeff = 0.0001;  // assumed wheel friction coefficient
         double expected_torque = commanded_torques[i] - friction_coeff * speeds[i];
         if (std::abs(expected_torque) > 2e-3) {
             double expected_accel = expected_torque / J_wheel;
             // If actual accel is near zero despite commanded torque
             if (std::abs(accel) < 0.05 * std::abs(expected_accel)) {
                 wm.stuck_count++;
-                if (wm.stuck_count >= 10) { // 1.0 seconds at 10Hz
+                if (wm.stuck_count >= 10) {  // 1.0 seconds at 10Hz
                     if (wm.status != HealthStatus::FAILED) {
                         wm.status = HealthStatus::FAILED;
-                        common::LogError("[FDIR] Wheel {} detected as STUCK (speed={:.2f} rad/s, command={:.3e} Nm)", i, speeds[i], commanded_torques[i]);
+                        common::LogError("[FDIR] Wheel {} detected as STUCK (speed={:.2f} rad/s, command={:.3e} Nm)", i,
+                                         speeds[i], commanded_torques[i]);
                     }
                 }
             } else {
@@ -288,7 +290,8 @@ void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vec
                 if (wm.degraded_count >= 15) {
                     if (wm.status == HealthStatus::HEALTHY) {
                         wm.status = HealthStatus::DEGRADED;
-                        common::LogWarning("[FDIR] Wheel {} detected as DEGRADED torque (accel ratio = {:.2f})", i, std::abs(accel / expected_accel));
+                        common::LogWarning("[FDIR] Wheel {} detected as DEGRADED torque (accel ratio = {:.2f})", i,
+                                           std::abs(accel / expected_accel));
                     }
                 }
             } else {
@@ -309,8 +312,10 @@ void FDIRManager::updateWheels(const std::vector<double>& speeds, const std::vec
                 common::LogWarning("[FDIR] Transitioning to DEGRADED mode due to 1 reaction wheel failure.");
                 mode_manager_->forceModeChange(core::MissionMode::DEGRADED, "FDIR: 1 reaction wheel failure detected");
             } else if (failed_count_after >= 2) {
-                common::LogError("[FDIR] Forcing transition to SAFE mode due to {} reaction wheel failures.", failed_count_after);
-                mode_manager_->forceModeChange(core::MissionMode::SAFE, "FDIR: Multiple reaction wheel failures detected");
+                common::LogError("[FDIR] Forcing transition to SAFE mode due to {} reaction wheel failures.",
+                                 failed_count_after);
+                mode_manager_->forceModeChange(core::MissionMode::SAFE,
+                                               "FDIR: Multiple reaction wheel failures detected");
             }
         }
     }

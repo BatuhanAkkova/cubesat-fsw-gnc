@@ -52,12 +52,7 @@ class SimRW : public hal::IRW {
      */
     void setSpeed(double speed_rad_s);
 
-    enum class RWFaultType {
-        NONE,
-        STUCK,
-        SATURATED,
-        DEGRADED_TORQUE
-    };
+    enum class RWFaultType { NONE, STUCK, SATURATED, DEGRADED_TORQUE };
 
     void injectFailure_Dead() {
         is_dead_ = true;

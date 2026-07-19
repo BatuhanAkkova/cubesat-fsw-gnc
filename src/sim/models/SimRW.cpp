@@ -39,7 +39,7 @@ double SimRW::step(double dt) {
 
     if (fault_type_ == RWFaultType::STUCK) {
         current_speed_ = stuck_speed_;
-        return 0.0; // No reaction torque on body when stuck
+        return 0.0;  // No reaction torque on body when stuck
     }
 
     // Apply efficiency to the commanded torque

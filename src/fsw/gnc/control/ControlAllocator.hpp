@@ -1,9 +1,11 @@
 #pragma once
 
-#include <Eigen/Dense>
 #include <vector>
-#include "common/types.hpp"
+
 #include "common/logger.hpp"
+#include "common/types.hpp"
+
+#include <Eigen/Dense>
 
 namespace fsw {
 namespace gnc {
@@ -11,7 +13,7 @@ namespace control {
 
 /**
  * @brief Reaction Wheel Control Allocator using Pseudo-Inverse.
- * 
+ *
  * Maps desired 3D spacecraft body torques to individual reaction wheel torques.
  * Supports a redundant 4-wheel pyramid configuration and dynamic reconfiguration
  * by zeroing out columns of failed wheels.
@@ -21,17 +23,15 @@ class ControlAllocator {
     ControlAllocator() {
         // Initialize default 4-wheel pyramid configuration:
         // Skew angle alpha = 45 degrees.
-        double c = 0.7071067811865475; // cos(45)
-        double s = 0.7071067811865475; // sin(45)
+        double c = 0.7071067811865475;  // cos(45)
+        double s = 0.7071067811865475;  // sin(45)
 
         // w1 = [c, 0, s]
         // w2 = [0, c, s]
         // w3 = [-c, 0, s]
         // w4 = [0, -c, s]
         A_nominal_.resize(3, 4);
-        A_nominal_ <<  c,  0.0, -c,  0.0,
-                      0.0,  c,  0.0, -c,
-                       s,   s,   s,   s;
+        A_nominal_ << c, 0.0, -c, 0.0, 0.0, c, 0.0, -c, s, s, s, s;
 
         wheel_healthy_ = {true, true, true, true};
     }
@@ -42,7 +42,8 @@ class ControlAllocator {
     void setWheelHealth(size_t index, bool healthy) {
         if (index < wheel_healthy_.size()) {
             if (wheel_healthy_[index] != healthy) {
-                common::LogWarning("[Allocator] Wheel {} health status changed to {}", index, healthy ? "HEALTHY" : "FAILED");
+                common::LogWarning("[Allocator] Wheel {} health status changed to {}", index,
+                                   healthy ? "HEALTHY" : "FAILED");
                 wheel_healthy_[index] = healthy;
             }
         }
@@ -60,7 +61,7 @@ class ControlAllocator {
 
     /**
      * @brief Allocate 3D body torque command to reaction wheels
-     * 
+     *
      * @param body_torque Desired control torque on body [Nm]
      * @param allocated_torques Output vector of individual wheel commands [Nm]
      * @return true if allocation succeeded, false if rank is deficient (unable to control 3D)
@@ -82,13 +83,14 @@ class ControlAllocator {
 
         // Check if configuration is rank deficient (requires 3 independent axes)
         if (std::abs(det) < 1e-7) {
-            common::LogError("[Allocator] Rank deficient wheel configuration (det = {:.3e}). Cannot allocate torque.", det);
+            common::LogError("[Allocator] Rank deficient wheel configuration (det = {:.3e}). Cannot allocate torque.",
+                             det);
             return false;
         }
 
         // Right pseudo-inverse: A^# = A^T * (A * A^T)^-1
         // Motor torque T_w = - A^# * T_body
-        Eigen::VectorXd u = - A.transpose() * AAT.inverse() * body_torque;
+        Eigen::VectorXd u = -A.transpose() * AAT.inverse() * body_torque;
 
         for (int i = 0; i < 4; ++i) {
             if (wheel_healthy_[i]) {
@@ -106,6 +108,6 @@ class ControlAllocator {
     std::vector<bool> wheel_healthy_;
 };
 
-} // namespace control
-} // namespace gnc
-} // namespace fsw
+}  // namespace control
+}  // namespace gnc
+}  // namespace fsw

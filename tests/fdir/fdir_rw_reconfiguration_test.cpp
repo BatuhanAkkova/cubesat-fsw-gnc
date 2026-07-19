@@ -24,16 +24,14 @@ TEST(FDIRRWReconfigurationTest, NominalAllocation) {
     double c = 0.7071067811865475;
     double s = 0.7071067811865475;
     Eigen::MatrixXd A(3, 4);
-    A <<  c,  0.0, -c,  0.0,
-         0.0,  c,  0.0, -c,
-          s,   s,   s,   s;
+    A << c, 0.0, -c, 0.0, 0.0, c, 0.0, -c, s, s, s, s;
 
     Eigen::VectorXd u(4);
     for (int i = 0; i < 4; ++i) {
         u(i) = allocated_torques[i];
     }
 
-    Eigen::Vector3d recon = - A * u;
+    Eigen::Vector3d recon = -A * u;
     EXPECT_NEAR(recon(0), cmd_torque.x(), 1e-6);
     EXPECT_NEAR(recon(1), cmd_torque.y(), 1e-6);
     EXPECT_NEAR(recon(2), cmd_torque.z(), 1e-6);
@@ -41,7 +39,7 @@ TEST(FDIRRWReconfigurationTest, NominalAllocation) {
 
 TEST(FDIRRWReconfigurationTest, ReconfigurationSingleWheelFailure) {
     ControlAllocator allocator;
-    
+
     // Simulate Wheel 0 (index 0) failure
     allocator.setWheelHealth(0, false);
     EXPECT_FALSE(allocator.getWheelHealth(0));
@@ -52,22 +50,21 @@ TEST(FDIRRWReconfigurationTest, ReconfigurationSingleWheelFailure) {
 
     bool success = allocator.allocate(cmd_torque, allocated_torques);
     EXPECT_TRUE(success);
-    EXPECT_NEAR(allocated_torques[0], 0.0, 1e-9); // Wheel 0 should not be commanded
+    EXPECT_NEAR(allocated_torques[0], 0.0, 1e-9);  // Wheel 0 should not be commanded
 
     // Reconstruct body torque from active wheels only
     double c = 0.7071067811865475;
     double s = 0.7071067811865475;
     Eigen::MatrixXd A(3, 4);
-    A << 0.0,  0.0, -c,  0.0, // Column 0 is zeroed out
-         0.0,  c,  0.0, -c,
-         0.0,   s,   s,   s;
+    A << 0.0, 0.0, -c, 0.0,  // Column 0 is zeroed out
+        0.0, c, 0.0, -c, 0.0, s, s, s;
 
     Eigen::VectorXd u(4);
     for (int i = 0; i < 4; ++i) {
         u(i) = allocated_torques[i];
     }
 
-    Eigen::Vector3d recon = - A * u;
+    Eigen::Vector3d recon = -A * u;
     EXPECT_NEAR(recon(0), cmd_torque.x(), 1e-6);
     EXPECT_NEAR(recon(1), cmd_torque.y(), 1e-6);
     EXPECT_NEAR(recon(2), cmd_torque.z(), 1e-6);
@@ -77,13 +74,13 @@ TEST(FDIRRWReconfigurationTest, FDIRWheelDiagnosticsAndTransitions) {
     FDIRManager fdir;
     ModeManager mode_manager;
     fdir.setModeManager(&mode_manager);
-    
+
     // Initialize state
     mode_manager.forceModeChange(MissionMode::NOMINAL, "Test Start");
     EXPECT_EQ(mode_manager.getCurrentMode(), MissionMode::NOMINAL);
 
     std::vector<double> speeds = {0.0, 0.0, 0.0, 0.0};
-    std::vector<double> commands = {0.01, 0.0, 0.0, 0.0}; // Command Wheel 0
+    std::vector<double> commands = {0.01, 0.0, 0.0, 0.0};  // Command Wheel 0
     double dt = 0.1;
 
     // Wheel 0 speed is stuck at 0.0 despite commands

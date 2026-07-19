@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+
 #include "common/types.hpp"
 
 namespace common {
@@ -14,8 +15,8 @@ struct SensorData {
     common::Vector3 sun_body;       // Sun vector in body frame
 
     // Reaction wheel telemetry
-    std::vector<double> rw_speeds;       // rad/s
-    std::vector<double> rw_torques_prev; // Nm
+    std::vector<double> rw_speeds;        // rad/s
+    std::vector<double> rw_torques_prev;  // Nm
 };
 
 }  // namespace common

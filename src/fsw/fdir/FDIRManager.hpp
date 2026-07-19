@@ -165,7 +165,8 @@ class FDIRManager {
      * @param dt Sampling period [s]
      * @param current_time Mission time [s]
      */
-    void updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques, double dt, double current_time);
+    void updateWheels(const std::vector<double>& speeds, const std::vector<double>& commanded_torques, double dt,
+                      double current_time);
 
     /**
      * @brief Get health status of a reaction wheel
